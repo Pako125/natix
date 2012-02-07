@@ -20,7 +20,7 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using Mono.Options;
+using NDesk.Options;
 using natix.CompactDS;
 
 namespace natix.SimilaritySearch

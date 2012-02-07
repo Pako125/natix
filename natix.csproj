@@ -283,6 +283,7 @@
     <Compile Include="SimilaritySearch\Indexes\LC_ParallelSearch.cs" />
     <Compile Include="SimilaritySearch\Indexes\LC_PFixedM.cs" />
     <Compile Include="SimilaritySearch\Indexes\LC_PRNN.cs" />
+    <Compile Include="NDesk.Options\Options.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

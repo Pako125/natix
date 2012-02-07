@@ -20,7 +20,7 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Mono.Options;
+using NDesk.Options;
 using natix.SortingSearching;
 // Adapted from SISAP library src/spaces/documents/objdocuments.h to Natix library.
 

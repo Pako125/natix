@@ -27,7 +27,7 @@ using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using System.Diagnostics;
-using Mono.Options;
+using NDesk.Options;
 
 namespace natix.SimilaritySearch
 {

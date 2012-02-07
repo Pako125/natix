@@ -26,7 +26,7 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters;
-using Mono.Options;
+using NDesk.Options;
 
 namespace natix.SimilaritySearch
 {

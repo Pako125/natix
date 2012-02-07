@@ -23,7 +23,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.IO.Compression;
 using System.Reflection;
-using Mono.Options;
+using NDesk.Options;
 
 namespace natix.SimilaritySearch
 {
