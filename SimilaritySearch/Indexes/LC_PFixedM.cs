@@ -137,15 +137,15 @@ namespace natix.SimilaritySearch
 			this.spaceName = db_name;
 			this.SetMainSpace ((Space<T>)sp);
 			this.CENTERS = new List<int> (n / M + 1);
-			var rest_list = new List<int> (n);
+			this.build_rest_list = new List<int> (n);
 			var invindex = new List<IList<int>> (this.CENTERS.Count);
 			this.COV = new List<float> (this.CENTERS.Count);
 			// Randomization
 			Console.WriteLine ("XXXXX LC_FixedM building {0}, n: {1}", output_name, n);
 			for (int i = 0; i < n; ++i) {
-				rest_list.Add (i);
+				this.build_rest_list.Add (i);
 			}
-			this.BuildFixedM (output_name, this.CENTERS, invindex, COV, M);
+			this.BuildFixedM (output_name, this.CENTERS, invindex, this.COV, M);
 			this.SaveLC (output_name, invindex);
 			this.CompileLC (output_name);
 			Dirty.SaveIndexXml (output_name, this);

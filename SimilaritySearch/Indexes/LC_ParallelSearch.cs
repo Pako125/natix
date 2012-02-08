@@ -96,7 +96,9 @@ namespace natix.SimilaritySearch
 					// C.Push (center, rm);
 				}
 			};
-			Parallel.For (0, len, S);
+			var pops = new ParallelOptions ();
+			pops.MaxDegreeOfParallelism = -1;
+			Parallel.For (0, len, pops, S);
 			//foreach (ResultPair pair in C) {
 			Action<ResultPair> Scenters = delegate(ResultPair pair) {
 				var dcq = pair.dist;
@@ -114,7 +116,9 @@ namespace natix.SimilaritySearch
 					}
 				}
 			};
-			Parallel.ForEach<ResultPair> (C, Scenters);
+			pops = new ParallelOptions ();
+			pops.MaxDegreeOfParallelism = -1;
+			Parallel.ForEach<ResultPair> (C, pops, Scenters);
 			return R;
 		}
 		
