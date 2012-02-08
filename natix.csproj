@@ -284,11 +284,10 @@
     <Compile Include="SimilaritySearch\Indexes\LC_PFixedM.cs" />
     <Compile Include="SimilaritySearch\Indexes\LC_PRNN.cs" />
     <Compile Include="NDesk.Options\Options.cs" />
+    <Compile Include="Util\FixedSizeScheduler.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <None Include="bin\changes-natix.org" />
-    <None Include="bin\natix.xml" />
     <None Include="Numeric\replace-templates.py" />
     <None Include="Numeric\Numeric.cs.template" />
   </ItemGroup>

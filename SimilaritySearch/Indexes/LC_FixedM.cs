@@ -150,8 +150,9 @@ namespace natix.SimilaritySearch
 				}
 				COV.Add ((float)covrad);
 				if (iteration % 1000 == 0) {
-					Console.WriteLine ("docid {0}, iteration {1}/{2}, {3}", center, iteration, numiterations, nick);
+					Console.WriteLine ("docid {0}, iteration {1}/{2}, {3}, date: {4}", center, iteration, numiterations, nick, DateTime.Now);
 				}
+				Console.WriteLine ("docid {0}, iteration {1}/{2}, {3}, date: {4}", center, iteration, numiterations, nick, DateTime.Now);
 				iteration++;
 			}
 			Console.WriteLine ("XXX END BuildFixedM rest_list.Count: {0}, iterations: {1}", rest_list.Count, iteration);

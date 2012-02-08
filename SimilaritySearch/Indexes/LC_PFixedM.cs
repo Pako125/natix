@@ -19,6 +19,7 @@ using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using NDesk.Options;
 using natix.CompactDS;
@@ -64,6 +65,7 @@ namespace natix.SimilaritySearch
 			};
 			var pops = new ParallelOptions ();
 			pops.MaxDegreeOfParallelism = -1;
+			// pops.TaskScheduler = new FixedSizeScheduler ();
 			Parallel.For (0, n, pops, action);
 			foreach (var p in R) {
 				var i = p.docid;
@@ -118,8 +120,9 @@ namespace natix.SimilaritySearch
 				}
 				COV.Add ((float)covrad);
 				if (iteration % 1000 == 0) {
-					Console.WriteLine ("docid {0}, iteration {1}/{2}, {3}", center, iteration, numiterations, nick);
+					Console.WriteLine ("docid {0}, iteration {1}/{2}, {3}, date: {4}", center, iteration, numiterations, nick, DateTime.Now);
 				}
+				Console.WriteLine ("docid {0}, iteration {1}/{2}, {3}, date: {4}", center, iteration, numiterations, nick, DateTime.Now);
 				iteration++;
 			}
 			Console.WriteLine ("XXX END BuildFixedM rest_list.Count: {0}, iterations: {1}", this.build_rest_list.Count, iteration);
