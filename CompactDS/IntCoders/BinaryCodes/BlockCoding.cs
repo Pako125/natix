@@ -23,16 +23,16 @@ using System.IO;
 
 namespace natix.CompactDS
 {
-	public class BlockCoding : IIntegerEncoder
+	public class BlockCoding : IIEncoder32
 	{
-		IIntegerEncoder SkipCoder;
+		IIEncoder32 SkipCoder;
 		int Power;
 		
 		public BlockCoding ()
 		{
 		}
 		
-		public BlockCoding (int power, IIntegerEncoder skipcoder)
+		public BlockCoding (int power, IIEncoder32 skipcoder)
 		{
 			// power must be an small integer like 3, 4, 5
 			this.Power = power;
@@ -41,13 +41,13 @@ namespace natix.CompactDS
 
 		public virtual void Save (BinaryWriter Output)
 		{
-			IntegerEncoderGenericIO.Save (Output, this.SkipCoder);
+			IEncoder32GenericIO.Save (Output, this.SkipCoder);
 			Output.Write ((byte)this.Power);
 		}
 
 		public virtual void Load (BinaryReader Input)
 		{
-			this.SkipCoder = IntegerEncoderGenericIO.Load (Input);
+			this.SkipCoder = IEncoder32GenericIO.Load (Input);
 			this.Power = Input.ReadByte ();
 		}
 

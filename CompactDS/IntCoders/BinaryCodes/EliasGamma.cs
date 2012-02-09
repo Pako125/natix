@@ -23,7 +23,7 @@ using System.IO;
 
 namespace natix.CompactDS
 {
-	public class EliasGamma : IIntegerEncoder
+	public class EliasGamma : IIEncoder32
 	{
 		/// <summary>
 		/// Stores the number of zeros at the beggining

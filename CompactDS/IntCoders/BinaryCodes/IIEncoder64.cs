@@ -13,23 +13,23 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/CompactDS/IntCoders/BinaryCodes/IIntegerEncoder.cs
+//   Original filename: natix/natix/CompactDS/IntCoders/BinaryCodes/IIEncoder64.cs
 // 
 using System;
 using System.IO;
 
 namespace natix.CompactDS
 {
-	public interface IIntegerEncoder : ILoadSave
+	public interface IIEncoder64 : ILoadSave
 	{
 		/// <summary>
-		/// Decodes the next integer (pointed by context ctx) from the bit stream
+		/// Decodes the next 64 bit integer (pointed by context ctx) from the bit stream
 		/// </summary>
-		int Decode (IBitStream stream, BitStreamCtx ctx);
+		long Decode (IBitStream stream, BitStreamCtx ctx);
 		/// <summary>
 		/// Encodes "u" into the specified "stream"
 		/// </summary>
-		void Encode (IBitStream stream, int u);
+		void Encode (IBitStream stream, long u);
 	}
 }
 

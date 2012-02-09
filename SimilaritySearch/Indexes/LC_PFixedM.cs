@@ -65,6 +65,8 @@ namespace natix.SimilaritySearch
 			};
 			var pops = new ParallelOptions ();
 			pops.MaxDegreeOfParallelism = -1;
+			// var w = new TaskFactory ();
+
 			// pops.TaskScheduler = new FixedSizeScheduler ();
 			Parallel.For (0, n, pops, action);
 			foreach (var p in R) {

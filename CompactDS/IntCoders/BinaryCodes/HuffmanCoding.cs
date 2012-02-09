@@ -23,7 +23,7 @@ using System.IO;
 
 namespace natix.CompactDS
 {
-	public class HuffmanCoding : IIntegerEncoder
+	public class HuffmanCoding : IIEncoder32
 	{
 		
 		public HuffmanTree Huffman;

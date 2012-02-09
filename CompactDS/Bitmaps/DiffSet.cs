@@ -25,7 +25,7 @@ namespace natix.CompactDS
 {
 	public class DiffSet : RankSelectBase
 	{
-		static IIntegerEncoder Coder = new EliasGamma();
+		static IIEncoder32 Coder = new EliasGamma();
 		//static IIntegerEncoder Coder = new EliasDelta ();
 		static int AccStart = -1;
 		public BitStream32 Stream;

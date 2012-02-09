@@ -76,7 +76,7 @@ namespace natix.CompactDS
 			this.Build (list, maxvalue, new EliasDelta());
 		}
 
-		public virtual void Build (IList<int> list, int maxvalue, IIntegerEncoder icoder, short blocksize = 63)
+		public virtual void Build (IList<int> list, int maxvalue, IIEncoder32 icoder, short blocksize = 63)
 		{
 			int n = list.Count;
 			var B_lens = new BitStream32 ();

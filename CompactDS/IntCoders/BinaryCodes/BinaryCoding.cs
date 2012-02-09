@@ -26,7 +26,7 @@ namespace natix.CompactDS
 	/// <summary>
 	/// Uses a small fixed number of bits to represent numbers. Truncated binary.
 	/// </summary>
-	public class BinaryCoding : IIntegerEncoder
+	public class BinaryCoding : IIEncoder32
 	{
 		byte numbits;
 		

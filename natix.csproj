@@ -261,8 +261,6 @@
     <Compile Include="CompactDS\IntCoders\BinaryCodes\EliasDelta.cs" />
     <Compile Include="CompactDS\IntCoders\BinaryCodes\EliasGamma.cs" />
     <Compile Include="CompactDS\IntCoders\BinaryCodes\HuffmanCoding.cs" />
-    <Compile Include="CompactDS\IntCoders\BinaryCodes\IIntegerEncoder.cs" />
-    <Compile Include="CompactDS\IntCoders\BinaryCodes\IntegerEncoderGenericIO.cs" />
     <Compile Include="CompactDS\IntCoders\BinaryCodes\RiceCoding.cs" />
     <Compile Include="CompactDS\IntCoders\BinaryCodes\UnaryCoding.cs" />
     <Compile Include="CompactDS\IntCoders\BinaryCodes\ZeroCoding.cs" />
@@ -285,6 +283,15 @@
     <Compile Include="SimilaritySearch\Indexes\LC_PRNN.cs" />
     <Compile Include="NDesk.Options\Options.cs" />
     <Compile Include="Util\FixedSizeScheduler.cs" />
+    <Compile Include="CompactDS\Bitmaps\DiffSetRL2_64.cs" />
+    <Compile Include="CompactDS\Lists\SortedListRS64.cs" />
+    <Compile Include="CompactDS\IntCoders\SearchingCodesBinary\BinarySearchCoding64.cs" />
+    <Compile Include="CompactDS\IntCoders\BinaryCodes\IIEncoder64.cs" />
+    <Compile Include="CompactDS\IntCoders\BinaryCodes\IIEncoder32.cs" />
+    <Compile Include="CompactDS\IntCoders\SearchingCodesBinary\DoublingSearchCoding64.cs" />
+    <Compile Include="CompactDS\IntCoders\SearchingCodesBinary\UltimateSearchCoding64.cs" />
+    <Compile Include="CompactDS\IntCoders\BinaryCodes\IEncoder32GenericIO.cs" />
+    <Compile Include="CompactDS\IntCoders\BinaryCodes\IEncoder64GenericIO.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -13,22 +13,20 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/CompactDS/IntCoders/SearchingCodesBinary/DoublingSearchCoding.cs
+//   Original filename: natix/natix/CompactDS/IntCoders/SearchingCodesBinary/UltimateSearchCoding64.cs
 // 
 using System;
 using System.IO;
 
 namespace natix.CompactDS
 {
-	public class DoublingSearchCoding : IIEncoder32
+	public class UltimateSearchCoding64 : IIEncoder64
 	{
-		BinarySearchCoding SecondCoding;
 		
-		public DoublingSearchCoding ()
+		public UltimateSearchCoding64 ()
 		{
-			this.SecondCoding = new BinarySearchCoding (0);
 		}
-
+		
 		public void Save (BinaryWriter Output)
 		{
 		}
@@ -36,49 +34,56 @@ namespace natix.CompactDS
 		public void Load (BinaryReader Input)
 		{
 		}
-
-		public void Encode (IBitStream stream, int u)
+				
+		public void Encode (IBitStream stream, long u)
 		{
-			int min = 0;
+			long min = 0;
+			long check;
 			int galloping = 1;
-			int check;
 			while (true) {
-				check = (1 << galloping) - 1;
+				check = (1L << galloping) - 1L;
 				if (u > check) {
 					stream.Write (true);
-					min = check + 1;
+					min = check + 1L;
 					++galloping;
 				} else {
 					stream.Write (false);
-					if (min == 0) {
-						this.SecondCoding.Encode (stream, u, 2);
+					if (galloping == 1) {
+						stream.Write (u == 1L);
+						return;
 					} else {
-						this.SecondCoding.Encode (stream, u - min, min);
+						u -= min;
+						min = 0L;
+						galloping = 1;
 					}
-					break;
 				}
 			}
 		}
 		
-		public int Decode (IBitStream stream, BitStreamCtx ctx)
+		public long Decode (IBitStream stream, BitStreamCtx ctx)
 		{
-			int min = 0;
+			long min = 0;
+			long check;
+			long u = 0;
 			int galloping = 1;
-			int check;
 			while (true) {
-				check = (1 << galloping) - 1;
+				check = (1L << galloping) - 1L;
 				if (stream.Read (ctx)) {
-					min = check + 1;
+					min = check + 1L;
 					++galloping;
 				} else {
-					if (min == 0) {
-						return this.SecondCoding.Decode(stream, 2, ctx);
+					if (galloping == 1) {
+						if (stream.Read (ctx)) {
+							u++;
+						}
+						return u;
 					} else {
-						return min + this.SecondCoding.Decode(stream, min, ctx);
+						u += min;
+						min = 0L;
+						galloping = 1;
 					}
 				}
 			}
 		}
 	}
 }
-

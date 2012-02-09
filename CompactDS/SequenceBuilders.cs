@@ -59,7 +59,7 @@ namespace natix.CompactDS
 			};
 		}
 		
-		public static SequenceBuilder GetGolynskiListRL2 (short t, IIntegerEncoder coder, short block_size)
+		public static SequenceBuilder GetGolynskiListRL2 (short t, IIEncoder32 coder, short block_size)
 		{
 			return delegate (IList<int> seq, int sigma) {
 				var S = new GolynskiListRL2Seq ();
@@ -127,7 +127,7 @@ namespace natix.CompactDS
 		
 		public static SequenceBuilder GetWT (
 			BitmapFromBitStream bitmap_builder,
-			Func<int, IIntegerEncoder> get_coder
+			Func<int, IIEncoder32> get_coder
 		)
 		{
 			return delegate (IList<int> seq, int sigma) {

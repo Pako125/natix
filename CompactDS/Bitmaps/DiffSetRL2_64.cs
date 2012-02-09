@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/CompactDS/Bitmaps/DiffSetRL2.cs
+//   Original filename: natix/natix/CompactDS/Bitmaps/DiffSetRL2_64.cs
 // 
 using System;
 using System.Collections;
@@ -22,162 +22,152 @@ using System.IO;
 using natix.SortingSearching;
 
 namespace natix.CompactDS
-{
-	public class BitStreamCtxRL : BitStreamCtx
-	{
-		public int run_len;
-
-		public BitStreamCtxRL (long offset) : base(offset)
-		{
-			this.run_len = 0;
-		}
-		
-		public BitStreamCtxRL () : base(0L)
-		{
-		}
-	}
-	
+{	
 	/// <summary>
-	/// This is similar to DiffSetRL but with core changes to support filled blocks
+	/// A DiffSetRL2 supporting items on [0,2^63]
 	/// </summary>
-	public class DiffSetRL2 : RankSelectBase
-	{	
-		static IIEncoder32 Coder = new EliasGamma();
+	public class DiffSetRL2_64 : RankSelectBase64
+	{
 		// static IIntegerEncoder Coder = new EliasDelta ();
 		static int AccStart = -1;
 		static int PLAIN_SAMPLES_THRESHOLD = 32;
-		
-		public BitStream32 Stream;
-		int N;
-		int M;
+		protected IIEncoder64 Coder;
+		protected BitStream32 Stream;
+		protected long N;
+		protected int M;
 		protected short B = 31;
-		IList<int> Samples;
+		IList<long> Samples;
 		IList<int> Offsets;
 		// int run_len = 0;
 		
-		public DiffSetRL2 ()
+		public DiffSetRL2_64 ()
 		{
-			this.Samples = new List<int> ();
+			this.Samples = new List<long> ();
 			this.Offsets = new List<int> ();
 			this.Stream = new BitStream32 ();
+			this.Coder = new DoublingSearchCoding64 ();
 		}
 		
-		public DiffSetRL2 (short B) : this()
+		/*public DiffSetRL2_64 (short B, IIntegerEncoder) : this()
 		{
 			this.B = B;
-		}
+		}*/
 
-		public override bool Access (int pos)
-		{
-			int found_pos;
-			this.BackendAccessRank1 (pos, out found_pos, new BitStreamCtxRL ());
-			return pos == found_pos;
-		}
 		
-		public override int Count {
+		public override long Count {
 			get {
 				return this.N;
 			}
 		}
 		
-		public override int Count1 {
+		public override long Count1 {
 			get {
 				return this.M;
 			}
 		}
 
-		public override void Save (BinaryWriter W)
+		public override void Save (BinaryWriter Output)
 		{
 			// this.Commit ();
-			W.Write (this.N);
-			W.Write (this.M);
-			W.Write (this.B);
+			Output.Write ((long)this.N);
+			Output.Write ((int)this.M);
+			Output.Write ((short)this.B);
+			IEncoder64GenericIO.Save (Output, this.Coder);
 			//Console.WriteLine ("xxxxxx  save samples.count {0}. N: {1}, M: {2}, B: {3}, BitCount: {4}",
 			//	this.Samples.Count, this.N, this.M, this.B, this.Stream.CountBits);
 			if (this.Samples.Count > PLAIN_SAMPLES_THRESHOLD) {
-				var sa = new SArray ();
-				sa.Build (this.Samples);
-				sa.Save (W);
-				sa = new SArray ();
-				sa.Build (this.Offsets);
-				sa.Save (W);
+				{
+					var sa = new SArray64 ();
+					sa.Build (this.Samples);
+					sa.Save (Output);
+				}
+				{
+					var sa = new SArray ();
+					sa.Build (this.Offsets);
+					sa.Save (Output);
+				}
 			} else {
-				PrimitiveIO<int>.WriteVector (W, this.Samples);
-				PrimitiveIO<int>.WriteVector (W, this.Offsets);
+				PrimitiveIO<long>.WriteVector (Output, this.Samples);
+				PrimitiveIO<int>.WriteVector (Output, this.Offsets);
 			}
-			this.Stream.Save (W);
+			this.Stream.Save (Output);
 		}
 	
-		public override void Load (BinaryReader R)
+		public override void Load (BinaryReader Input)
 		{
 			// var POS = R.BaseStream.Position;
-			this.N = R.ReadInt32 ();
-			this.M = R.ReadInt32 ();
-			this.B = R.ReadInt16 ();
+			this.N = Input.ReadInt64 ();
+			this.M = Input.ReadInt32 ();
+			this.B = Input.ReadInt16 ();
+			this.Coder = IEncoder64GenericIO.Load (Input);
 			int num_samples = this.M / this.B;
-			if (num_samples > PLAIN_SAMPLES_THRESHOLD) { 
-				var sa = new SArray();
-				sa.Load(R);
-				this.Samples = new SortedListSArray (sa);
-				sa = new SArray ();
-				sa.Load (R);
-				this.Offsets = new SortedListSArray (sa);
+			if (num_samples > PLAIN_SAMPLES_THRESHOLD) {
+				{
+					var sa = new SArray64 ();
+					sa.Load (Input);
+					this.Samples = new SortedListRS64 (sa);
+				}
+				{
+					var sa = new SArray ();
+					sa.Load (Input);
+					this.Offsets = new SortedListSArray (sa);
+				}
 			} else {
-				this.Samples = new int[ num_samples ];
+				this.Samples = new long[ num_samples ];
 				this.Offsets = new int[ num_samples ];
-				PrimitiveIO<int>.ReadFromFile (R, num_samples, this.Samples);
-				PrimitiveIO<int>.ReadFromFile (R, num_samples, this.Offsets);
+				PrimitiveIO<long>.ReadFromFile (Input, num_samples, this.Samples);
+				PrimitiveIO<int>.ReadFromFile (Input, num_samples, this.Offsets);
 			}
 			// POS = R.BaseStream.Position - POS;
 			// Console.WriteLine("=======*******=======>> POS: {0}", POS);
-			this.Stream = new BitStream32();
-			this.Stream.Load (R);
+			this.Stream = new BitStream32 ();
+			this.Stream.Load (Input);
 			//Console.WriteLine ("xxxxxx  load samples.count {0}. N: {1}, M: {2}, B: {3}, BitCount: {4}",
 			//	this.Samples.Count, this.N, this.M, this.B, this.Stream.CountBits);
 
 		}
 		
-		public override void AssertEquality (IRankSelect _other)
+		public override void AssertEquality (IRankSelect64 _other)
 		{
-			DiffSetRL2 other = _other as DiffSetRL2;
+			DiffSetRL2_64 other = _other as DiffSetRL2_64;
 			if (this.N != other.N) {
-				throw new ArgumentException ("DiffSet N difference");
+				throw new ArgumentException ("DiffSetRL2_64 N difference");
 			}
 			if (this.M != other.M) {
-				throw new ArgumentException ("DiffSet M difference");
+				throw new ArgumentException ("DiffSetRL2_64 M difference");
 			}
 			if (this.B != other.B) {
-				throw new ArgumentException ("DiffSet B difference");
+				throw new ArgumentException ("DiffSetRL2_64 B difference");
 			}
-			Assertions.AssertIList<int> (this.Samples, other.Samples, "DiffSet Samples difference");
-			Assertions.AssertIList<int> (this.Offsets, other.Offsets, "DiffSet Offsets difference");
+			Assertions.AssertIList<long> (this.Samples, other.Samples, "DiffSetRL2_64 Samples difference");
+			Assertions.AssertIList<int> (this.Offsets, other.Offsets, "DiffSetRL2_64 Offsets difference");
 			this.Stream.AssertEquality (other.Stream);
 		}
-		
 		
 		/// <summary>
 		/// Returns the position of the rank-th enabled bit
 		/// </summary>
-		public override int Select1 (int rank)
+		public override long Select1 (long rank)
 		{
 			// Console.WriteLine ("**** Select1> rank: {0}", rank);
-			return this.BackendSelect1 (rank, new BitStreamCtxRL ());
+			return this.BackendSelect1 ((int)rank, new BitStreamCtxRL ());
 		}
 		
-		int ReadNext (BitStreamCtxRL ctx)
+		long ReadNext (BitStreamCtxRL ctx)
 		{
 			if (ctx.run_len > 0) {
 				ctx.run_len--;
 				return 1;
 			}
-			int d = Coder.Decode (this.Stream, ctx);
+			long d = Coder.Decode (this.Stream, ctx);
 			if (d == 1) {
-				ctx.run_len = Coder.Decode (this.Stream, ctx) - 1;
+				ctx.run_len = (int)Coder.Decode (this.Stream, ctx) - 1;
 			}
 			return d;
 		}
 		
-		int BackendSelect1 (int rank, BitStreamCtxRL ctx)
+
+		long BackendSelect1 (int rank, BitStreamCtxRL ctx)
 		{
 			if (rank < 1) {
 				return -1;
@@ -185,7 +175,7 @@ namespace natix.CompactDS
 			// reset run_len
 			ctx.run_len = 0;
 			int start_index = (rank - 1) / this.B;
-			int acc;
+			long acc;
 			int left;
 			//Console.WriteLine ("**** BaseSelect1> rank: {0}, start_index: {1}", rank, start_index);
 			if (start_index == 0) {
@@ -213,11 +203,11 @@ namespace natix.CompactDS
 //				acc += read;
 //			}
 			while (left > 0) {
-				int read;
+				long read;
 				if (ctx.run_len > 0) {
 					read = ctx.run_len;
 					ctx.run_len = 0;
-					left -= read;
+					left -= (int)read;
 					if (left < 0) {
 						read += left;
 						ctx.run_len += left;
@@ -232,10 +222,10 @@ namespace natix.CompactDS
 			return acc;
 		}
 		
-		int SeqAccessRank1 (int curr_pos, int pos, int max, out int found_pos, BitStreamCtxRL ctx)
+		long SeqAccessRank1 (long curr_pos, long pos, long max, out long found_pos, BitStreamCtxRL ctx)
 		{
-			int i = 0;
-			int u = -1;
+			long i = 0;
+			long u = -1;
 			while (i < max && curr_pos < pos) {
 				if (ctx.run_len > 0) {
 					u = ctx.run_len;
@@ -258,14 +248,21 @@ namespace natix.CompactDS
 			return i;
 		}
 		
-		public override int Rank1 (int pos)
+		public override long Rank1 (long pos)
 		{
-			int select_pos;
-			int rank = this.BackendAccessRank1 (pos, out select_pos, new BitStreamCtxRL ());
+			long select_pos;
+			long rank = this.BackendAccessRank1 (pos, out select_pos, new BitStreamCtxRL ());
 			return rank;
 		}
 		
-		int BackendAccessRank1 (int pos, out int found_pos, BitStreamCtxRL ctx)
+		public override bool Access(long pos)
+		{
+			long found_pos;
+			this.BackendAccessRank1 (pos, out found_pos, new BitStreamCtxRL ());
+			return pos == found_pos;
+		}
+		
+		long BackendAccessRank1 (long pos, out long found_pos, BitStreamCtxRL ctx)
 		{
 			if (pos < 0) {
 				found_pos = -1;
@@ -273,7 +270,7 @@ namespace natix.CompactDS
 			}
 			int start_index = -1;
 			if (this.Samples.Count > 0) {
-				start_index = GenericSearch.FindFirst<int> (pos, this.Samples);
+				start_index = GenericSearch.FindFirst<long> (pos, this.Samples);
 			}
 			// reset run_len
 			ctx.run_len = 0;
@@ -291,7 +288,7 @@ namespace natix.CompactDS
 			int rel_rank = (start_index + 1) * this.B;
 			if (this.Offsets.Count > start_index + 1 && this.Offsets[start_index + 1] == 1 + this.Offsets[start_index]) {
 				found_pos = pos;
-				int diff_rank = pos - this.Samples[start_index];
+				long diff_rank = pos - this.Samples[start_index];
 				return rel_rank + diff_rank;
 			} else {
 				ctx.Seek (this.Offsets[start_index]);
@@ -314,9 +311,9 @@ namespace natix.CompactDS
 			}
 		}
 		
-		public void Build (IList<int> orderedList, short b)
+		public void Build (IList<long> orderedList, short b)
 		{
-			int n = 0;
+			long n = 0;
 			if (orderedList.Count > 0) {
 				n = orderedList[orderedList.Count - 1] + 1;
 			}
@@ -326,12 +323,12 @@ namespace natix.CompactDS
 		/// <summary>
 		///  build methods
 		/// </summary>
-		public void Build (IEnumerable<int> orderedList, int n, short b)
+		public void Build (IEnumerable<long> orderedList, long n, short b)
 		{
 			this.N = n;
 			this.B = b;
 			this.M = 0;
-			int prev = -1;
+			long prev = -1;
 			var ctx = new BitStreamCtxRL ();
 	
 			foreach (var current in orderedList) {
@@ -339,7 +336,7 @@ namespace natix.CompactDS
 					prev = AccStart;
 				}
 				this.M++;
-				int diff = current - prev;
+				long diff = current - prev;
 				//Console.WriteLine ("DIFF {0}, num: {1}", diff, num++);
 				if (diff == 1) {
 					++ctx.run_len;
@@ -363,8 +360,8 @@ namespace natix.CompactDS
 			//	Console.WriteLine ("-- i: {0}, samples: {1}, offset: {2}", i, Samples[i], Offsets[i]);
 			//}
 		}
-		
-		public IEnumerable<int> iterate (IBitStream bitstream)
+	
+		public IEnumerable<long> iterate (IBitStream bitstream)
 		{
 			// Console.WriteLine ("count: {0}, bitstream: {1}", bitstream.CountBits, bitstream);
 			for (int i = 0; i < bitstream.CountBits; i++) {

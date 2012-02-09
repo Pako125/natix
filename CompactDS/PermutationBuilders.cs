@@ -72,7 +72,7 @@ namespace natix.CompactDS
 			};
 		}
 		
-		public static PermutationBuilder GetSuccRL2CyclicPerms (int t, IIntegerEncoder coder, short block_size)
+		public static PermutationBuilder GetSuccRL2CyclicPerms (int t, IIEncoder32 coder, short block_size)
 		{
 			return delegate (IList<int> perm) {
 				var P = new SuccRL2CyclicPerms_MRRR ();

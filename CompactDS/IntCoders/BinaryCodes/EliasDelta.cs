@@ -23,7 +23,7 @@ using System.IO;
 
 namespace natix.CompactDS
 {
-	public class EliasDelta : IIntegerEncoder
+	public class EliasDelta : IIEncoder32
 	{
 		static EliasGamma32 gammacoder = new EliasGamma32();
 

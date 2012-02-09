@@ -28,7 +28,7 @@ namespace natix.CompactDS
 	public class WaveletTree : IRankSelectSeq
 	{
 		// static INumericManager<T> Num = (INumericManager<T>)NumericManager.Get (typeof(T));
-		IIntegerEncoder Coder = null;
+		IIEncoder32 Coder = null;
 		BitStream32 CoderStream;
 		WaveletInner Root;
 		IList<WaveletLeaf> Alphabet;
@@ -56,7 +56,7 @@ namespace natix.CompactDS
 			this.BitmapBuilder = BitmapBuilders.GetGGMN_wt (16);
 		}
 		
-		public void Build (IIntegerEncoder coder, int alphabet_size, IList<int> text)
+		public void Build (IIEncoder32 coder, int alphabet_size, IList<int> text)
 		{
 			this.Alphabet = new WaveletLeaf[alphabet_size];
 			this.Root = new WaveletInner (null, true);
@@ -127,7 +127,7 @@ namespace natix.CompactDS
 		public void Save (BinaryWriter Output)
 		{
 			Output.Write ((int)this.Alphabet.Count);
-			IntegerEncoderGenericIO.Save (Output, this.Coder);
+			IEncoder32GenericIO.Save (Output, this.Coder);
 			// Console.WriteLine ("Output.Position: {0}", Output.BaseStream.Position);
 			this.SaveNode (Output, this.Root);
 		}
@@ -165,7 +165,7 @@ namespace natix.CompactDS
 		{
 			var size = Input.ReadInt32 ();
 			this.Alphabet = new WaveletLeaf[size];
-			this.Coder = IntegerEncoderGenericIO.Load (Input);
+			this.Coder = IEncoder32GenericIO.Load (Input);
 			// Console.WriteLine ("Input.Position: {0}", Input.BaseStream.Position);
 			this.Root = this.LoadNode (Input, null) as WaveletInner;
 		}

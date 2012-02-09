@@ -31,7 +31,7 @@ namespace natix.SimilaritySearch
 		IList<int> bitoffsets;
 		IList<int> lenoffsets;
 		BitStream32 bstream;
-		IIntegerEncoder encoder;
+		IIEncoder32 encoder;
 		// static INumericManager<T> num = (INumericManager<T>)NumericManager.Get (typeof(T));
 		
 		public CompressedOrderedList (string basename, int length)

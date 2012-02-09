@@ -39,7 +39,7 @@ namespace natix.CompactDS
 			this.Build (list);
 		}
 		
-		public ListSDiffCoderRL (IList<int> list, IIntegerEncoder coder, short blocksize)
+		public ListSDiffCoderRL (IList<int> list, IIEncoder32 coder, short blocksize)
 		{
 			this.Coder = coder;
 			this.BlockSize = blocksize;

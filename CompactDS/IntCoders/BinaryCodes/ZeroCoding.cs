@@ -23,17 +23,17 @@ using System.IO;
 
 namespace natix.CompactDS
 {
-	public class ZeroCoding : IIntegerEncoder
+	public class ZeroCoding : IIEncoder32
 	{
 		
-		IIntegerEncoder Coder;
+		IIEncoder32 Coder;
 		int Smaller;
 		
 		public ZeroCoding ()
 		{
 		}
 		
-		public ZeroCoding (IIntegerEncoder coder, int smaller)
+		public ZeroCoding (IIEncoder32 coder, int smaller)
 		{
 			this.Smaller = smaller;
 			this.Coder = coder;
@@ -51,13 +51,13 @@ namespace natix.CompactDS
 		
 		public void Save (BinaryWriter Output)
 		{
-			IntegerEncoderGenericIO.Save (Output, this.Coder);
+			IEncoder32GenericIO.Save (Output, this.Coder);
 			Output.Write ((int)this.Smaller);
 		}
 
 		public void Load (BinaryReader Input)
 		{
-			this.Coder = IntegerEncoderGenericIO.Load (Input);
+			this.Coder = IEncoder32GenericIO.Load (Input);
 			this.Smaller = Input.ReadInt32 ();
 		}
 	}

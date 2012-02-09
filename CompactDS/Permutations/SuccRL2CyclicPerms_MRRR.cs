@@ -25,9 +25,9 @@ namespace natix.CompactDS
 	public class SuccRL2CyclicPerms_MRRR : SuccCyclicPerms_MRRR 
 	{
 		public class BuildParams {
-			public IIntegerEncoder coder;
+			public IIEncoder32 coder;
 			public short block_size;
-			public BuildParams (IIntegerEncoder c, short b)
+			public BuildParams (IIEncoder32 c, short b)
 			{
 				this.coder = c;
 				this.block_size = b;

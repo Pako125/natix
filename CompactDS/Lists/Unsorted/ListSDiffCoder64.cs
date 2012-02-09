@@ -25,7 +25,7 @@ namespace natix.CompactDS
 {
 	public class ListSDiffCoder64 : ListGenerator<int>, ILoadSave
 	{
-		IIntegerEncoder Coder;
+		IIEncoder32 Coder;
 		public IBitStream Stream;
 		IList<long> Offsets;
 		public int BlockSize = 63;
@@ -38,7 +38,7 @@ namespace natix.CompactDS
 			this.Coder = new EliasGamma();
 		}
 		
-		public ListSDiffCoder64 (IIntegerEncoder coder, int B)
+		public ListSDiffCoder64 (IIEncoder32 coder, int B)
 		{
 			this.Stream = new BitStream32 ();
 			this.Offsets = new List<long> ();
@@ -107,7 +107,7 @@ namespace natix.CompactDS
 		public void Load (BinaryReader Input)
 		{
 			
-			this.Coder = IntegerEncoderGenericIO.Load(Input);
+			this.Coder = IEncoder32GenericIO.Load(Input);
 			this.BlockSize = Input.ReadInt32 ();
 			this.M = Input.ReadInt32 ();
 			this.Stream.Load (Input);
@@ -118,7 +118,7 @@ namespace natix.CompactDS
 		
 		public void Save (BinaryWriter Output)
 		{
-			IntegerEncoderGenericIO.Save(Output, this.Coder);
+			IEncoder32GenericIO.Save(Output, this.Coder);
 			Output.Write ((int)this.BlockSize);
 			Output.Write ((int)this.M);
 			this.Stream.Save(Output);

@@ -13,50 +13,38 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/CompactDS/IntCoders/BinaryCodes/UnaryCoding.cs
+//   Original filename: natix/natix/CompactDS/Lists/SortedListRS64.cs
 // 
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 
 namespace natix.CompactDS
 {
-	public class UnaryCoding : IIEncoder32
-	{
-	
-		public UnaryCoding ()
+	public class SortedListRS64 : ListGenerator<long>
+	{ 
+		public IRankSelect64 rs;
+
+		public SortedListRS64 (IRankSelect64 rs)
 		{
+			this.rs = rs;
 		}
-	
-		public void Encode (IBitStream Buffer, int u)
-		{
-			if (u < 0) {
-				throw new ArgumentOutOfRangeException (String.Format ("Invalid range for UnaryCoding, u: {0}", u));
+				
+		public override int Count {
+			get {
+				return (int)this.rs.Count1;
 			}
-			Buffer.Write (false, u);
-			Buffer.Write (true);
-			//Buffer.Write (true, u);
-			//Buffer.Write (false);
-
 		}
 		
-		public int Decode (IBitStream Buffer, BitStreamCtx ctx)
+		public override long GetItem (int index)
 		{
-			int u = Buffer.ReadZeros (ctx);
-			//int u = Buffer.ReadOnes ();
-			Buffer.Read (ctx);
-			return u;
+			return this.rs.Select1 (index + 1);
 		}
 		
-		public void Save (BinaryWriter Output)
+		public override void SetItem (int index, long u)
 		{
+			throw new NotSupportedException ();
 		}
-
-		public void Load (BinaryReader Input)
-		{
-		}
-
 	}
 }

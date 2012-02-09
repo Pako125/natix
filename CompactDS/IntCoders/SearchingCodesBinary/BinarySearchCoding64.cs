@@ -13,45 +13,45 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/CompactDS/IntCoders/SearchingCodesBinary/BinarySearchCoding.cs
+//   Original filename: natix/natix/CompactDS/IntCoders/SearchingCodesBinary/BinarySearchCoding64.cs
 // 
 using System;
 using System.IO;
 
 namespace natix.CompactDS
 {
-	public class BinarySearchCoding : IIEncoder32
+	public class BinarySearchCoding64 : IIEncoder64
 	{
-		int Size;
+		long MaxValue;
 		
-		public BinarySearchCoding () : this(32)
+		public BinarySearchCoding64 () : this(long.MaxValue)
 		{
 		}
 		
-		public BinarySearchCoding (int size)
+		public BinarySearchCoding64 (long maxvalue)
 		{
-			this.Size = size;
+			this.MaxValue = maxvalue;
 		}
 		
 		public void Save (BinaryWriter Output)
 		{
-			Output.Write ((int)this.Size);
+			Output.Write ((long)this.MaxValue);
 		}
 
 		public void Load (BinaryReader Input)
 		{
-			this.Size = Input.ReadInt32 ();
+			this.MaxValue = Input.ReadInt64 ();
 		}
 
 
-		public void Encode (IBitStream stream, int u, int N)
+		public void Encode (IBitStream stream, long u, long N)
 		{
-			int min = 0;
-			int max = N - 1;
-			int mid;
+			long min = 0;
+			long max = N - 1;
+			long mid;
 			do {
 				mid = (min >> 1) + (max >> 1);
-				if (1 == (min & 1 & max)) {
+				if (1L == (min & 1L & max)) {
 					mid++;
 				}
 				if (u <= mid) {
@@ -59,39 +59,39 @@ namespace natix.CompactDS
 					max = mid;
 				} else {
 					stream.Write (true);
-					min = mid + 1;
+					min = mid + 1L;
 				}
 			} while (min < max);
 		}
 		
-		public int Decode (IBitStream stream, int N, BitStreamCtx ctx)
+		public long Decode (IBitStream stream, long N, BitStreamCtx ctx)
 		{
-			int min = 0;
-			int max = N - 1;
-			int mid;
+			long min = 0;
+			long max = N - 1;
+			long mid;
 			do {
 				mid = (min >> 1) + (max >> 1);
-				if (1 == (min & 1 & max)) {
+				if (1L == (min & 1L & max)) {
 					mid++;
 				}
 				if (!stream.Read (ctx)) {
 					max = mid;
 				} else {
-					min = mid + 1;
+					min = mid + 1L;
 				}
 			} while (min < max);
-			return min;		
+			return min;	
 		}
 		
-		public void Encode (IBitStream stream, int u)
+		public void Encode (IBitStream stream, long u)
 		{
-			this.Encode (stream, u, this.Size);
+			this.Encode (stream, u, this.MaxValue);
 		}
 
 	
-		public int Decode (IBitStream stream, BitStreamCtx ctx)
+		public long Decode (IBitStream stream, BitStreamCtx ctx)
 		{
-			return this.Decode (stream, this.Size, ctx);
+			return this.Decode (stream, this.MaxValue, ctx);
 		}
 	}
 }

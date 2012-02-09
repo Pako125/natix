@@ -20,7 +20,7 @@ using System.IO;
 
 namespace natix.CompactDS
 {
-	public class UltimateSearchCoding : IIntegerEncoder
+	public class UltimateSearchCoding : IIEncoder32
 	{
 		
 		public UltimateSearchCoding ()
