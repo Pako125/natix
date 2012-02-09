@@ -77,7 +77,7 @@ namespace natix.SimilaritySearch
 		public LC_RNN () : base()
 		{	
 			//this.SeqBuilder = SequenceBuilders.GetIISeq_SArray ();
-			this.SeqBuilder = SequenceBuilders.GetSeqXLB();
+			//this.SeqBuilder = SequenceBuilders.GetSeqXLB();
 			//this.SeqBuilder = SequenceBuilders.GetIISeq (BitmapBuilders.GetPlainSortedList ());
 		}
 		
@@ -278,7 +278,7 @@ namespace natix.SimilaritySearch
 					seq [i] = inv [u];
 				}
 			}
-			/*if (this.MainSpace.Count / num_centers < 128) {
+			if (this.MainSpace.Count / num_centers < 128) {
 				// golynski is not good enough (in search time) since cache issues
 				// it is very fast for random queries (random symbol, random pos-rank)
 				// but working on the same symbol, in sequential access, is clearly
@@ -286,7 +286,7 @@ namespace natix.SimilaritySearch
 				this.SeqBuilder = SequenceBuilders.GetGolynskiListRL2 (24);
 			} else {
 				this.SeqBuilder = SequenceBuilders.GetIISeq_SArray ();
-			}*/
+			}
 			//this.SeqBuilder = SequenceBuilders.GetGolynskiListRL2 (24);
 			//this.SeqBuilder = SequenceBuilders.GetGolynskiSinglePerm (PermutationBuilders.GetCyclicPerms (24));
 			//this.SeqBuilder = SequenceBuilders.GetIISeq (BitmapBuilders.GetPlainSortedList ());
