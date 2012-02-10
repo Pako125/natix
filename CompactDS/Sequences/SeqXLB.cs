@@ -36,7 +36,7 @@ namespace natix.CompactDS
 		{
 		}
 		
-		public void Build (IList<int> seq, int sigma, int t = 16)
+		public void Build (IList<int> seq, int sigma, int t = 16, BitmapFromList64 bitmap_builder = null)
 		{
 			this.sigma = sigma;
 			var L = new List<long> (seq.Count);
@@ -46,12 +46,16 @@ namespace natix.CompactDS
 				L.Add (n * s + i);
 			}
 			L.Sort ();
-			var sa = new SArray64 ();
-			sa.Build (L, n * sigma);
-			this.xl_bitmap = sa;
+			if (bitmap_builder == null) {
+				bitmap_builder = BitmapBuilders.GetSArray64 ();
+			}
+			//var sa = new SArray64 ();
+			//sa.Build (L, n * sigma);
+			//this.xl_bitmap = sa;
+			this.xl_bitmap = bitmap_builder (L, n * sigma);
 			// now building the permutation for access
 			var p = new ListGen_MRRR ();
-			p.Build (this.GetNotIdxPERM(), t, null);
+			p.Build (this.GetNotIdxPERM (), t, null);
 			this.perm = p;
 		}
 		

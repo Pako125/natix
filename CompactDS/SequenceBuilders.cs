@@ -185,11 +185,20 @@ namespace natix.CompactDS
 			};
 		}
 		
-		public static SequenceBuilder GetSeqXLB ()
+		public static SequenceBuilder GetSeqXLB_SArray (short t)
 		{
 			return delegate (IList<int> seq, int sigma) {
 				var seqxl = new SeqXLB ();
 				seqxl.Build (seq, sigma);
+				return seqxl;
+			};
+		}
+		
+		public static SequenceBuilder GetSeqXLB (short t, BitmapFromList64 bitmap_builder)
+		{
+			return delegate (IList<int> seq, int sigma) {
+				var seqxl = new SeqXLB ();
+				seqxl.Build (seq, sigma, t, bitmap_builder);
 				return seqxl;
 			};
 		}

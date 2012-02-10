@@ -21,6 +21,7 @@ using System.Collections.Generic;
 
 namespace natix.CompactDS
 {
+	public delegate IRankSelect64 BitmapFromList64(IList<long> L, long n);
 	public delegate IRankSelect BitmapFromList(IList<int> L);
 	public delegate IRankSelect BitmapFromBitStream(FakeBitmap stream);
 	
@@ -173,6 +174,25 @@ namespace natix.CompactDS
 			return delegate (FakeBitmap b) {
 				var rs = new DiffSet ();
 				rs.Build (CreateSortedList (b), b.Count, sample_step);
+				return rs;
+			};
+		}
+		
+		// 64 bit bitmaps
+		public static BitmapFromList64 GetSArray64 ()
+		{
+			return delegate (IList<long> L, long n) {
+				var rs = new SArray64 ();
+				rs.Build (L);
+				return rs;
+			};
+		}
+		
+		public static BitmapFromList64 GetDiffSetRL2_64 (short b)
+		{
+			return delegate (IList<long> L, long n) {
+				var rs = new DiffSetRL2_64 ();
+				rs.Build (L, n, b);
 				return rs;
 			};
 		}
