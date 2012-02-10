@@ -64,13 +64,13 @@ namespace natix.SimilaritySearch
 		}
 		
 		/// <summary>
-		/// Gets or sets the seq builder.
+		/// Gets or sets the seq builder. 
 		/// </summary>
 		public SequenceBuilder SeqBuilder {
 			get;
 			set;
 		}
-		
+
 		/// <summary>
 		/// Initializes a new instance
 		/// </summary>
@@ -79,6 +79,24 @@ namespace natix.SimilaritySearch
 			//this.SeqBuilder = SequenceBuilders.GetIISeq_SArray ();
 			//this.SeqBuilder = SequenceBuilders.GetSeqXLB();
 			//this.SeqBuilder = SequenceBuilders.GetIISeq (BitmapBuilders.GetPlainSortedList ());
+			var SBGMR06 = SequenceBuilders.GetGolynskiListRL2 (24);
+			var SBOS07 = SequenceBuilders.GetIISeq_SArray ();
+			this.SeqBuilder = delegate (IList<int> seq, int sigma) {
+				// mix
+				if (seq.Count / (sigma - 1) < 128) {
+					// golynski is not good enough (in search time) since cache issues
+					// it is very fast for random queries (random symbol, random pos-rank)
+					// but working on the same symbol, in sequential access, is clearly
+					// suprised by IISeq_SArray
+					return SBGMR06 (seq, sigma);
+				} else {
+					return SBOS07 (seq, sigma);
+				}
+			};
+			//this.SeqBuilder = SequenceBuilders.GetGolynskiListRL2 (24);
+			//this.SeqBuilder = SequenceBuilders.GetGolynskiSinglePerm (PermutationBuilders.GetCyclicPerms (24));
+			//this.SeqBuilder = SequenceBuilders.GetIISeq (BitmapBuilders.GetPlainSortedList ());
+
 		}
 		
 		/// <summary>
@@ -278,18 +296,6 @@ namespace natix.SimilaritySearch
 					seq [i] = inv [u];
 				}
 			}
-			if (this.MainSpace.Count / num_centers < 128) {
-				// golynski is not good enough (in search time) since cache issues
-				// it is very fast for random queries (random symbol, random pos-rank)
-				// but working on the same symbol, in sequential access, is clearly
-				// suprised by IISeq_SArray
-				this.SeqBuilder = SequenceBuilders.GetGolynskiListRL2 (24);
-			} else {
-				this.SeqBuilder = SequenceBuilders.GetIISeq_SArray ();
-			}
-			//this.SeqBuilder = SequenceBuilders.GetGolynskiListRL2 (24);
-			//this.SeqBuilder = SequenceBuilders.GetGolynskiSinglePerm (PermutationBuilders.GetCyclicPerms (24));
-			//this.SeqBuilder = SequenceBuilders.GetIISeq (BitmapBuilders.GetPlainSortedList ());
 			IRankSelectSeq S = this.SeqBuilder (seq, num_centers + 1);
 			seq = null;
 			using (var OutputSEQ = new BinaryWriter (File.Create (name + ".lc.seqindex"))) {
