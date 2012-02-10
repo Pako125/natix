@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/FunLists/ListShiftIndex.cs
+//   Original filename: natix/FunLists/ListShiftIndex.cs
 // 
 using natix;
 using System;

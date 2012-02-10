@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/SimilaritySearch/Containers/ListContainerFixedSize.cs
+//   Original filename: natix/SimilaritySearch/Containers/ListContainerFixedSize.cs
 // 
 using System;
 using System.Collections;

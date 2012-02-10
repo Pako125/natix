@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/CompactDS/Permutations/PermutationGenericIO.cs
+//   Original filename: natix/CompactDS/Permutations/PermutationGenericIO.cs
 // 
 using System;
 using System.IO;

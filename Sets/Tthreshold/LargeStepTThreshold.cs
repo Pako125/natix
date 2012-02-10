@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/Sets/Tthreshold/LargeStepTThreshold.cs
+//   Original filename: natix/Sets/Tthreshold/LargeStepTThreshold.cs
 // 
 using System;
 using System.Collections;

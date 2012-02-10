@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/SimilaritySearch/Spaces/BinaryHammingSpace.cs
+//   Original filename: natix/SimilaritySearch/Spaces/BinaryHammingSpace.cs
 // 
 using System;
 using System.IO;

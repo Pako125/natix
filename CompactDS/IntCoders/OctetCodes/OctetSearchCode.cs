@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/CompactDS/IntCoders/OctetCodes/OctetSearchCode.cs
+//   Original filename: natix/CompactDS/IntCoders/OctetCodes/OctetSearchCode.cs
 // 
 using System;
 using System.IO;

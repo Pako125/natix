@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/Numeric/INumeric.cs
+//   Original filename: natix/Numeric/INumeric.cs
 // 
 using System;
 using System.IO;

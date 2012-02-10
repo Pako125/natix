@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/CompactDS/Permutations/ListGen_MRRR.cs
+//   Original filename: natix/CompactDS/Permutations/ListGen_MRRR.cs
 // 
 using System;
 using System.IO;

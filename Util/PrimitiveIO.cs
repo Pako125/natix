@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/Util/PrimitiveIO.cs
+//   Original filename: natix/Util/PrimitiveIO.cs
 // 
 using System;
 using System.Collections;

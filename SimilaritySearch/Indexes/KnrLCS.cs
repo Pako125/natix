@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/SimilaritySearch/Indexes/KnrLCS.cs
+//   Original filename: natix/SimilaritySearch/Indexes/KnrLCS.cs
 // 
 using System;
 using System.IO;

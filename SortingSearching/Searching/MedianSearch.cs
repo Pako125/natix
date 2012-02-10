@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/SortingSearching/Searching/MedianSearch.cs
+//   Original filename: natix/SortingSearching/Searching/MedianSearch.cs
 // 
 using System;
 using System.Collections;

@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/FunLists/ListGen2.cs
+//   Original filename: natix/FunLists/ListGen2.cs
 // 
 using System;
 using System.Collections;

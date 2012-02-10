@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/CompactDS/Text/SuffixSearch/SuffixSorter.cs
+//   Original filename: natix/CompactDS/Text/SuffixSearch/SuffixSorter.cs
 // 
 using System;
 using System.Collections;

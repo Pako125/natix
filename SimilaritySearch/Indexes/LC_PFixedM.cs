@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/SimilaritySearch/Indexes/LC_PFixedM.cs
+//   Original filename: natix/SimilaritySearch/Indexes/LC_PFixedM.cs
 // 
 using System;
 using System.IO;

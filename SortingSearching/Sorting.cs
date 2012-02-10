@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/SortingSearching/Sorting.cs
+//   Original filename: natix/SortingSearching/Sorting.cs
 // 
 using System;
 using System.Collections;

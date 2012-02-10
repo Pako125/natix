@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/Numeric/NumericSingle.cs
+//   Original filename: natix/Numeric/NumericSingle.cs
 // 
 using System;
 //using System.Text;

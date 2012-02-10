@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/CompactDS/Lists/Unsorted/ListSDiffCoder.cs
+//   Original filename: natix/CompactDS/Lists/Unsorted/ListSDiffCoder.cs
 // 
 using System;
 using System.Collections;

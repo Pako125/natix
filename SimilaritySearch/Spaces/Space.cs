@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/SimilaritySearch/Spaces/Space.cs
+//   Original filename: natix/SimilaritySearch/Spaces/Space.cs
 // 
 using System;
 using System.Collections.Generic;

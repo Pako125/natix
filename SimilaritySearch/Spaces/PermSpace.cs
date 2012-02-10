@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/SimilaritySearch/Spaces/PermSpace.cs
+//   Original filename: natix/SimilaritySearch/Spaces/PermSpace.cs
 // 
 using System;
 using System.IO;

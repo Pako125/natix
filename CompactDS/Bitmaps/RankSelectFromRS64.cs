@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/CompactDS/Sequences/RankSelectFromRS64.cs
+//   Original filename: natix/CompactDS/Sequences/RankSelectFromRS64.cs
 // using System;
 
 namespace natix.CompactDS

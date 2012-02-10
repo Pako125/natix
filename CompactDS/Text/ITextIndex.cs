@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/CompactDS/Text/ITextIndex.cs
+//   Original filename: natix/CompactDS/Text/ITextIndex.cs
 // 
 using System;
 using System.Collections;

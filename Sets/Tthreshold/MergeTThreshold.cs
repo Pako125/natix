@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/natix/Sets/Tthreshold/MergeTThreshold.cs
+//   Original filename: natix/Sets/Tthreshold/MergeTThreshold.cs
 // 
 using System;
 using System.Collections;
