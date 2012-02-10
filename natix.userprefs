@@ -1,0 +1,19 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="CompactDS/Bitmaps/DiffSetRL2_64.cs">
+    <Files>
+      <File FileName="SimilaritySearch/Indexes/LC_PFixedM.cs" Line="68" Column="7" />
+      <File FileName="SimilaritySearch/Indexes/LC_RNN.cs" Line="305" Column="16" />
+      <File FileName="CompactDS/Bitmaps/DiffSetRL2_64.cs" Line="191" Column="8" />
+      <File FileName="CompactDS/Lists/SortedListSArray.cs" Line="20" Column="31" />
+      <File FileName="CompactDS/Lists/SortedListRS64.cs" Line="36" Column="17" />
+      <File FileName="CompactDS/Bitmaps/DiffSetRL2.cs" Line="187" Column="1" />
+      <File FileName="CompactDS/Bitmaps/RankSelectGenericIO.cs" Line="1" Column="1" />
+      <File FileName="CompactDS/IntCoders/BinaryCodes/IEncoder64GenericIO.cs" Line="70" Column="28" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

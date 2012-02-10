@@ -177,6 +177,14 @@ namespace natix.CompactDS
 			return d;
 		}
 		
+		bool IsFilled (int block_id)
+		{
+			if (block_id == 0) {
+				return this.Samples [block_id] == (this.B - 1);
+			}
+			return (this.Samples [block_id] - this.Samples [block_id - 1]) == this.B;
+		}
+		
 		int BackendSelect1 (int rank, BitStreamCtxRL ctx)
 		{
 			if (rank < 1) {
@@ -189,7 +197,7 @@ namespace natix.CompactDS
 			int left;
 			//Console.WriteLine ("**** BaseSelect1> rank: {0}, start_index: {1}", rank, start_index);
 			if (start_index == 0) {
-				if (this.Offsets.Count > 0 && this.Offsets [0] == 1) {
+				if (this.Offsets.Count > 0 && this.IsFilled (0)) {
 					//Console.WriteLine ("**** INSIDE FULL> ");
 					ctx.run_len = this.B - rank;
 					return rank - 1;
@@ -202,7 +210,8 @@ namespace natix.CompactDS
 			} else {
 				acc = this.Samples [start_index - 1];
 				left = rank - start_index * this.B;
-				if (this.Offsets.Count > start_index && this.Offsets [start_index] == 1 + this.Offsets [start_index - 1]) {
+				//if (this.Offsets.Count > start_index && this.Offsets [start_index] == 1 + this.Offsets [start_index - 1]) {
+				if (this.Offsets.Count > start_index && this.IsFilled(start_index)) {
 					ctx.run_len = this.B - left;
 					return acc + left;
 				}
@@ -279,7 +288,8 @@ namespace natix.CompactDS
 			ctx.run_len = 0;
 			// int count;
 			if (start_index < 0) {
-				if (this.Offsets.Count > 0 && this.Offsets[0] == 1) {
+				//if (this.Offsets.Count > 0 && this.Offsets[0] == 1) {
+				if (this.Offsets.Count > 0 && this.IsFilled (0)) {
 					found_pos = pos;
 					return pos + 1;
 				} else {
@@ -289,7 +299,8 @@ namespace natix.CompactDS
 				}
 			}
 			int rel_rank = (start_index + 1) * this.B;
-			if (this.Offsets.Count > start_index + 1 && this.Offsets[start_index + 1] == 1 + this.Offsets[start_index]) {
+			//if (this.Offsets.Count > start_index + 1 && this.Offsets[start_index + 1] == 1 + this.Offsets[start_index]) {
+			if (this.Offsets.Count > start_index + 1 && this.IsFilled(start_index+1)) {
 				found_pos = pos;
 				int diff_rank = pos - this.Samples[start_index];
 				return rel_rank + diff_rank;
@@ -359,9 +370,9 @@ namespace natix.CompactDS
 				prev = current;
 			}
 			this.Commit (ctx);
-			//for (int i = 0; i < this.Samples.Count; i++) {
-			//	Console.WriteLine ("-- i: {0}, samples: {1}, offset: {2}", i, Samples[i], Offsets[i]);
-			//}
+			/*for (int i = 0; i < this.Samples.Count; i++) {
+				Console.WriteLine ("-- i: {0}, samples: {1}, offset: {2}", i, Samples[i], Offsets[i]);
+			}*/
 		}
 		
 		public IEnumerable<int> iterate (IBitStream bitstream)

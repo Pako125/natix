@@ -149,7 +149,7 @@ namespace natix.CompactDS
 		/// </summary>
 		public override long Select1 (long rank)
 		{
-			// Console.WriteLine ("**** Select1> rank: {0}", rank);
+			//Console.WriteLine ("**** Select1> rank: {0}", rank);
 			return this.BackendSelect1 ((int)rank, new BitStreamCtxRL ());
 		}
 		
@@ -161,11 +161,18 @@ namespace natix.CompactDS
 			}
 			long d = Coder.Decode (this.Stream, ctx);
 			if (d == 1) {
-				ctx.run_len = (int)Coder.Decode (this.Stream, ctx) - 1;
+				ctx.run_len = ((int)Coder.Decode (this.Stream, ctx)) - 1;
 			}
 			return d;
 		}
 		
+		bool IsFilled (int block_id)
+		{
+			if (block_id == 0) {
+				return this.Samples [block_id] == (this.B - 1);
+			}
+			return (this.Samples [block_id] - this.Samples [block_id - 1]) == this.B;
+		}
 
 		long BackendSelect1 (int rank, BitStreamCtxRL ctx)
 		{
@@ -179,20 +186,22 @@ namespace natix.CompactDS
 			int left;
 			//Console.WriteLine ("**** BaseSelect1> rank: {0}, start_index: {1}", rank, start_index);
 			if (start_index == 0) {
-				if (this.Offsets.Count > 0 && this.Offsets [0] == 1) {
+				//if (this.Offsets.Count > 0 && this.Offsets [0] == 1) {
+				if (this.Offsets.Count > 0 && this.IsFilled (0)) {
 					//Console.WriteLine ("**** INSIDE FULL> ");
 					ctx.run_len = this.B - rank;
 					return rank - 1;
 					// this.run_len = this.B;
 				}
-				// Console.WriteLine ("**** OUT-SIDE FULL> ");
+				//Console.WriteLine ("**** OUT-SIDE FULL> B: {0}", this.B);
 				acc = AccStart;
 				ctx.Seek (0);
 				left = rank;
 			} else {
 				acc = this.Samples [start_index - 1];
 				left = rank - start_index * this.B;
-				if (this.Offsets.Count > start_index && this.Offsets [start_index] == 1 + this.Offsets [start_index - 1]) {
+				//if (this.Offsets.Count > start_index && this.Offsets [start_index] == 1 + this.Offsets [start_index - 1]) {
+				if (this.Offsets.Count > start_index && this.IsFilled(start_index)) {
 					ctx.run_len = this.B - left;
 					return acc + left;
 				}
@@ -276,7 +285,8 @@ namespace natix.CompactDS
 			ctx.run_len = 0;
 			// int count;
 			if (start_index < 0) {
-				if (this.Offsets.Count > 0 && this.Offsets[0] == 1) {
+				//if (this.Offsets.Count > 0 && this.Offsets[0] == 1) {
+				if (this.Offsets.Count > 0 && this.IsFilled (0)) {
 					found_pos = pos;
 					return pos + 1;
 				} else {
@@ -286,7 +296,8 @@ namespace natix.CompactDS
 				}
 			}
 			int rel_rank = (start_index + 1) * this.B;
-			if (this.Offsets.Count > start_index + 1 && this.Offsets[start_index + 1] == 1 + this.Offsets[start_index]) {
+			//if (this.Offsets.Count > start_index + 1 && this.Offsets[start_index + 1] == 1 + this.Offsets[start_index]) {
+			if (this.Offsets.Count > start_index + 1 && this.IsFilled(start_index + 1) ) {
 				found_pos = pos;
 				long diff_rank = pos - this.Samples[start_index];
 				return rel_rank + diff_rank;
@@ -299,7 +310,7 @@ namespace natix.CompactDS
 				
 		void Commit (BitStreamCtxRL ctx)
 		{
-			// Console.WriteLine ("commit run_len: {0}", this.run_len);
+			//Console.WriteLine ("commit run_len: {0}, B: {1}", ctx.run_len, this.B);
 			if (ctx.run_len > 0) {
 				if (ctx.run_len == this.B) {
 					Coder.Encode (this.Stream, 1);
@@ -337,7 +348,7 @@ namespace natix.CompactDS
 				}
 				this.M++;
 				long diff = current - prev;
-				//Console.WriteLine ("DIFF {0}, num: {1}", diff, num++);
+				//Console.WriteLine ("DIFF {0}, num: {1}, current: {2}", diff, this.M, current);
 				if (diff == 1) {
 					++ctx.run_len;
 				} else {
@@ -345,7 +356,7 @@ namespace natix.CompactDS
 					// Console.WriteLine ("%%%%%% diff: {0}, prev: {1}, curr: {2}", diff, prev, current);
 					Coder.Encode (this.Stream, diff);
 				}
-				if (this.M % this.B == 0) {
+				if ((this.M % this.B) == 0) {	
 					this.Commit (ctx);
 					this.Samples.Add (current);
 					this.Offsets.Add ((int)this.Stream.CountBits);
@@ -356,9 +367,9 @@ namespace natix.CompactDS
 				prev = current;
 			}
 			this.Commit (ctx);
-			//for (int i = 0; i < this.Samples.Count; i++) {
-			//	Console.WriteLine ("-- i: {0}, samples: {1}, offset: {2}", i, Samples[i], Offsets[i]);
-			//}
+			/*for (int i = 0; i < this.Samples.Count; i++) {
+				Console.WriteLine ("-- i: {0}, samples: {1}, offset: {2}", i, Samples[i], Offsets[i]);
+			}*/
 		}
 	
 		public IEnumerable<long> iterate (IBitStream bitstream)
