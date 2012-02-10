@@ -22,11 +22,11 @@ using System.Runtime.CompilerServices;
 // Change them to the values specific to your project.
 
 [assembly: AssemblyTitle("natix")]
-[assembly: AssemblyDescription("The Natix Similarity Search Library")]
+[assembly: AssemblyDescription("The natix Library")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("The natix project")]
 [assembly: AssemblyProduct("Natix library")]
-[assembly: AssemblyCopyright("GPL")]
+[assembly: AssemblyCopyright("Eric Sadit Tellez - 2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
