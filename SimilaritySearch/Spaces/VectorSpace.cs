@@ -16,12 +16,9 @@
 //   Original filename: natix/SimilaritySearch/Spaces/VectorSpace.cs
 // 
 using System;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 
 namespace natix.SimilaritySearch
 {

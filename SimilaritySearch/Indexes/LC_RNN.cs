@@ -247,7 +247,7 @@ namespace natix.SimilaritySearch
 		/// <summary>
 		/// Compiles the LC
 		/// </summary>
-		protected void CompileLC (string name)
+		public void CompileLC (string name)
 		{
 			var Input = new StreamReader (File.OpenRead (name + ".lc"));
 			int num_centers = int.Parse (Input.ReadLine ());
