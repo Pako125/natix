@@ -33,10 +33,10 @@ namespace natix.CompactDS
 				this.block_size = b;
 			}
 			
-			public BuildParams () : this(new EliasDelta(), 63)
+			//public BuildParams () : this(new EliasDelta(), 127)
+			public BuildParams () : this(new EliasGamma32(), 127)
 			{
 			}
-
 		}
 		
 		public SuccRL2CyclicPerms_MRRR () : base()
