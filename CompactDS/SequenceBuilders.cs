@@ -63,8 +63,8 @@ namespace natix.CompactDS
 		{
 			return delegate (IList<int> seq, int sigma) {
 				var S = new GolynskiListRL2Seq ();
-				S.PermCodingBuildParams = new SuccRL2CyclicPerms_MRRR.BuildParams (coder, block_size);
-				S.Build (seq, sigma, t);
+				//S.PermCodingBuildParams = new SuccRL2CyclicPerms_MRRR.BuildParams (coder, block_size);
+				S.Build (seq, sigma, t, coder, block_size);
 				return S;
 			};
 		}

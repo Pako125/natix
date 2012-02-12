@@ -57,8 +57,6 @@ namespace natix.CompactDS
 			this.BitmapBuilder = BitmapBuilders.GetGGMN_wt (16);
 		}
 		
-		
-		
 		void Print1Perm (IList<int> p)
 		{
 			foreach (var u in p) {

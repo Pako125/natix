@@ -68,16 +68,14 @@ namespace natix.CompactDS
 		public void Save (BinaryWriter Output)
 		{
 			Output.Write ((int)this.sigma);
-			this.xl_bitmap.Save (Output);
+			RankSelect64GenericIO.Save (Output, this.xl_bitmap);
 			this.perm.Save (Output);
 		}
 		
 		public void Load (BinaryReader Input)
 		{
 			this.sigma = Input.ReadInt32 ();
-			var sa = new SArray64 ();
-			sa.Load (Input);
-			this.xl_bitmap = sa;
+			this.xl_bitmap = RankSelect64GenericIO.Load (Input);
 			var p = new ListGen_MRRR ();
 			p.Load (Input);
 			p.SetPERM (this.GetNotIdxPERM ());

@@ -57,29 +57,27 @@ namespace natix.CompactDS
 			set;
 		}*/
 		
-		public BitmapFromBitStream BitmapBuilder {
+		public static BitmapFromBitStream BitmapBuilder {
 			get;
 			set;
 		}
 		
-		public SuccRL2CyclicPerms_MRRR.BuildParams PermCodingBuildParams {
-			get;
-			set;
-		}
-			
 #endregion
+		
+		static GolynskiListRL2Seq ()
+		{
+			BitmapBuilder = BitmapBuilders.GetGGMN_wt (16);
+		}
 		
 		public GolynskiListRL2Seq ()
 		{
-			this.BitmapBuilder = BitmapBuilders.GetGGMN_wt (16);
-			this.PermCodingBuildParams = new SuccRL2CyclicPerms_MRRR.BuildParams ();
 		}
 		
 #region BUILD
 		/// <summary>
 		/// Build the specified seq, sigma and t.
 		/// </summary>
-		public void Build (IList<int> seq, int sigma, short t)
+		public void Build (IList<int> seq, int sigma, short t = 16, IIEncoder32 rl2_coder = null, short rl2_block_size = 127)
 		{
 			// A counting sort construction of the permutation
 			var counters = new int[sigma];
@@ -111,47 +109,15 @@ namespace natix.CompactDS
 			// an additional 1 to the end, to simplify source code
 			lens.Write (true);
 			var bb_lens = new FakeBitmap (lens);
-			this.LENS = this.BitmapBuilder (bb_lens);
+			this.LENS = BitmapBuilder (bb_lens);
 			this.PERM = new SuccRL2CyclicPerms_MRRR ();
-			this.PERM.Build (P, t, this.PermCodingBuildParams);
+			if (rl2_coder == null) {
+				rl2_coder = new EliasGamma32 ();
+			}
+			var build_params = new SuccRL2CyclicPerms_MRRR.BuildParams (rl2_coder, rl2_block_size);
+			this.PERM.Build (P, t, build_params);
 		}
 
-//		public void XBuild (IList<int> seq, int sigma, short t)
-//		{
-//			var lens = new BitStream32 ();
-//			var lists = new List<int>[sigma];
-//			for (int i = 0; i < sigma; i++) {
-//				lists [i] = new List<int> ();
-//			}
-//			// TODO replace BuildPermInvIndex per a two passes counting sort like
-//			var n = seq.Count;
-//			for (int i = 0; i < n; i++) {
-//				var symbol = seq [i];
-//				lists [symbol].Add (i);
-//			}
-//			var numbits = (int)Math.Ceiling (Math.Log (n, 2));
-//			var perm = new ListIFS (numbits);
-//			for (int i = 0; i < sigma; i++) {
-//				foreach (var u in lists[i]) {
-//					perm.Add (u);
-//				}
-//				lens.Write (true);
-//				lens.Write (false, lists [i].Count);
-//				lists [i] = null;
-//			}
-//			// a simple hack to simplify the algorithms
-//			lens.Write (true);
-//			var bb_lens = new BitmapBuild (lens);
-//			this.LENS = this.BitmapBuilder (bb_lens);
-//			this.PERM = new SuccRL2CyclicPerms_MRRR ();
-//			this.PERM.Build (perm, t);
-////			Console.WriteLine ("***** GolynskiSinglePermSeq");
-////			PrintArray ("PERMUTATION-BUILD:", perm);
-////			PrintArray ("PERMUTATION-ENCODED:", this.PERM);
-////			Console.WriteLine (new BitStream32 ((this.LENS as GGMN).GetBitBlocks ()));
-////			PrintArray ("SEQ:", seq);
-//		}
-		
 		void PrintArray (string msg, IList<int> P)
 		{
 			Console.WriteLine (msg);

@@ -1,25 +1,23 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="CompactDS/Lists/SortedListRS64.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="CompactDS/BitmapBuilders.cs">
     <Files>
-      <File FileName="SimilaritySearch/Indexes/LC_PFixedM.cs" Line="68" Column="7" />
-      <File FileName="SimilaritySearch/Indexes/LC_RNN.cs" Line="1" Column="1" />
-      <File FileName="CompactDS/Bitmaps/DiffSetRL2_64.cs" Line="191" Column="8" />
-      <File FileName="CompactDS/Lists/SortedListSArray.cs" Line="1" Column="1" />
-      <File FileName="CompactDS/Lists/SortedListRS64.cs" Line="5" Column="70" />
-      <File FileName="CompactDS/Bitmaps/DiffSetRL2.cs" Line="1" Column="1" />
-      <File FileName="CompactDS/Bitmaps/RankSelectGenericIO.cs" Line="1" Column="1" />
-      <File FileName="CompactDS/IntCoders/BinaryCodes/IEncoder64GenericIO.cs" Line="1" Column="1" />
-      <File FileName="AssemblyInfo.cs" Line="24" Column="35" />
+      <File FileName="CompactDS/Bitmaps/DiffSetRL2.cs" Line="77" Column="30" />
+      <File FileName="SimilaritySearch/Spaces/SequenceSpace.cs" Line="24" Column="1" />
+      <File FileName="CompactDS/SequenceBuilders.cs" Line="197" Column="64" />
+      <File FileName="CompactDS/BitmapBuilders.cs" Line="202" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State expanded="True">
           <Node name="natix" expanded="True">
             <Node name="CompactDS" expanded="True">
-              <Node name="Lists" expanded="True">
-                <Node name="SortedListRS64.cs" selected="True" />
-              </Node>
+              <Node name="Sequences" expanded="True" />
+              <Node name="BitmapBuilders.cs" selected="True" />
+            </Node>
+            <Node name="SimilaritySearch" expanded="True">
+              <Node name="Indexes" expanded="True" />
+              <Node name="Spaces" expanded="True" />
             </Node>
           </Node>
         </State>

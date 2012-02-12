@@ -242,6 +242,22 @@ namespace natix.CompactDS
 			return high_weight | ell;
 			//return (high_weight << this.GetNumLowerBits ()) | ((long)this.L [rank - 1]);
 		}
+
+		public long Select1_UnraveledSymbol (long _rank, long pos_rank)
+		{
+			if (_rank <= 0) {
+				return -1;
+			}
+			int rank = (int)_rank;
+			if (pos_rank == long.MinValue) {
+				pos_rank = this.H.Select1 (rank);
+			}
+			// int high_weight = this.H.Rank0 (pos_rank) - 1;
+			long high_weight = pos_rank - rank;
+			high_weight <<= this.GetNumLowerBits ();
+			long ell = this.L [rank - 1];
+			return high_weight | ell;
+		}
 		
 		public ListGenerator64<long> GetAsIList ()
 		{

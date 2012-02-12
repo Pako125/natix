@@ -195,25 +195,9 @@ namespace natix.CompactDS
 			// Remember that $pos = rank0 + rank1 - 1$, thus $rank1 = pos - rank0 + 1$
 			//int rank1_prevX = this.H.Rank1 (pos_prev); // prevcount = rank1
 			int rank1_prev = pos_prev - rank0_prev + 1;
-			/*if (rank1_prevX != rank1_prev) {
-				var msg = String.Format ("PREVCOUNT: count: {0}, count1: {1}, pos: {2}, rank0_prev: {3}, pos_prev: {4}, H.Count: {5}, H.Count1: {6}\n",
-					this.Count, this.Count1, pos, rank0_prev, pos_prev, this.H.Count, this.H.Count1);
-				msg += String.Format ("rank1_prev: {0}, rank1_prevX: {1}", rank1_prev, rank1_prevX);
-				Console.WriteLine (msg);
-				throw new Exception (msg);
-			}
-			rank1_prev = rank1_prevX;*/
 			//int rank1_nextX = this.H.Rank1 (this.H.Select0 (rank0_prev + 1));
 			int pos_next = this.H.Select0 (rank0_prev + 1);
 			int rank1_next = pos_next - rank0_prev;
-			/*if (rank1_nextX != rank1_next) {
-				var msg = String.Format ("NEXTCOUNT count: {0}, count1: {1}, pos: {2}, rank0_prev: {3}, pos_next: {4}, H.Count: {5}, H.Count1: {6}\n",
-					this.Count, this.Count1, pos, rank0_prev, pos_next, this.H.Count, this.H.Count1);
-				msg += String.Format ("rank1_next: {0}, rank1_nextX: {1}", rank1_next, rank1_nextX);
-				Console.WriteLine (msg);
-				// throw new Exception (msg);
-			}
-			rank1_next = rank1_nextX;*/
 			uint pos_masked = (uint)(this.get_mask () & pos);
 			// Console.WriteLine ("xxxxx {0}", nextcount - prevcount);
 			int count = rank1_next - rank1_prev;
@@ -248,7 +232,20 @@ namespace natix.CompactDS
 			int high_weight = pos_rank - rank;
 			return (high_weight << this.GetNumLowerBits ()) | ((int)this.L [rank - 1]);
 		}
-		
+
+		public int Select1_UnraveledSymbol (int rank, ref int pos_rank)
+		{
+			if (rank <= 0) {
+				return -1;
+			}
+			if (pos_rank == int.MinValue) {
+				pos_rank = this.H.Select1 (rank);
+			}
+			// int high_weight = this.H.Rank0 (pos_rank) - 1;
+			int high_weight = pos_rank - rank;
+			return (high_weight << this.GetNumLowerBits ()) | ((int)this.L [rank - 1]);
+		}
+
 		public IList<int> GetAsIList ()
 		{
 			return new ListGen<int> (delegate(int i) {

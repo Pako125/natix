@@ -292,11 +292,14 @@
     <Compile Include="CompactDS\IntCoders\SearchingCodesBinary\UltimateSearchCoding64.cs" />
     <Compile Include="CompactDS\IntCoders\BinaryCodes\IEncoder32GenericIO.cs" />
     <Compile Include="CompactDS\IntCoders\BinaryCodes\IEncoder64GenericIO.cs" />
+    <Compile Include="CompactDS\Bitmaps\RankSelect64GenericIO.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <None Include="Numeric\replace-templates.py" />
     <None Include="Numeric\Numeric.cs.template" />
+    <None Include="README" />
+    <None Include="natix.userprefs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Util\" />
