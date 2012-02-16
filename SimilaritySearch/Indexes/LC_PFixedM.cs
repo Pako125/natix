@@ -59,7 +59,7 @@ namespace natix.SimilaritySearch
 				var oid = this.build_rest_list [i];
 				if (oid < 0) {
 					lock (this) {
-						++nullC[t_id];
+						++nullC [t_id];
 					}
 					return;
 				}
@@ -78,15 +78,20 @@ namespace natix.SimilaritySearch
 			}
 			Console.WriteLine ();*/
 			int nullcount = 0;
+			var _res = new Result (res.K, res.Ceiling);
 			for (int x = 0; x < R.Length; ++x) {
 				var _R = R [x];
 				nullcount += nullC [x];
 				foreach (var p in _R) {
 					var i = p.docid;
-					res.Push (this.build_rest_list [i], p.dist);
-					this.build_rest_list [i] = -1;
-					++nullcount;
+					_res.Push (i, p.dist);
 				}
+			}
+			foreach (var p in _res) {
+				var i = p.docid;
+				res.Push (this.build_rest_list [i], p.dist);
+				this.build_rest_list [i] = -1;
+				++nullcount;
 			}
 			// an amortized algorithm to handle deletions
 			// the idea is to keep the order of review to improve cache
@@ -108,11 +113,12 @@ namespace natix.SimilaritySearch
 		/// Builds the LC with fixed bucket size (static version).
 		/// </summary>
 		public void BuildFixedM (string nick,
-		                                IList<int> CENTERS, IList<IList<int>> invindex,
-		                                IList<float> COV, int M)
+		                         IList<int> CENTERS,
+		                         IList<IList<int>> invindex,
+		                         IList<float> COV, int M)
 		{
 			int iteration = 0;
-			int numiterations = this.build_rest_list.Count / M + 1;
+			int numiterations = this.build_rest_list.Count/ M + 1;
 			var rand = new Random ();
 			Console.WriteLine ("XXX BEGIN BuildFixedM rest_list.Count: {0}", this.build_rest_list.Count);
 			while (this.build_rest_list.Count > 0) {
@@ -125,7 +131,7 @@ namespace natix.SimilaritySearch
 				this.build_rest_list [i] = -1;
 				CENTERS.Add (center);
 				IResult res = this.MainSpace.CreateResult (M, false);
-				BuildSearchKNN (this.MainSpace [center], res);
+				this.BuildSearchKNN (this.MainSpace [center], res);
 				var list = new List<int> ();
 				invindex.Add (list);
 				double covrad = double.MaxValue;
