@@ -47,33 +47,46 @@ namespace natix.SimilaritySearch
 		void BuildSearchKNN (T center, IResult res)
 		{
 			var n = this.build_rest_list.Count;
-			int nullcount = 0;
-			var R = new Result (res.K, res.Ceiling);
+			int max_t = 16;
+			Result[] R = new Result[max_t];
+			int[] nullC = new int[max_t];
+			for (int i = 0; i < max_t; ++i) {
+				R [i] = new Result (res.K, res.Ceiling);
+			}
 			Action<int> action = delegate(int i) {
 				//for (int i = 0; i < n; ++i) {
+				var t_id = Thread.CurrentThread.ManagedThreadId % max_t;
 				var oid = this.build_rest_list [i];
 				if (oid < 0) {
 					lock (this) {
-						++nullcount;
+						++nullC[t_id];
 					}
 					return;
 				}
 				var dist = this.MainSpace.Dist (center, this.MainSpace [oid]);
-				lock (R) {
-					R.Push (i, dist);
+				lock (R[t_id]) {
+					R [t_id].Push (i, dist);
 				}
 			};
 			var pops = new ParallelOptions ();
 			pops.MaxDegreeOfParallelism = -1;
 			// var w = new TaskFactory ();
-
 			// pops.TaskScheduler = new FixedSizeScheduler ();
 			Parallel.For (0, n, pops, action);
-			foreach (var p in R) {
-				var i = p.docid;
-				res.Push (this.build_rest_list [i], p.dist);
-				this.build_rest_list [i] = -1;
-				++nullcount;
+			/*for (int i = 0; i < this.thread_counter.Length; ++i) {
+				Console.Write ("{0}, ", this.thread_counter [i]);
+			}
+			Console.WriteLine ();*/
+			int nullcount = 0;
+			for (int x = 0; x < R.Length; ++x) {
+				var _R = R [x];
+				nullcount += nullC [x];
+				foreach (var p in _R) {
+					var i = p.docid;
+					res.Push (this.build_rest_list [i], p.dist);
+					this.build_rest_list [i] = -1;
+					++nullcount;
+				}
 			}
 			// an amortized algorithm to handle deletions
 			// the idea is to keep the order of review to improve cache

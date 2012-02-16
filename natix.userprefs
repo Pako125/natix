@@ -1,11 +1,8 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="CompactDS/BitmapBuilders.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="SimilaritySearch/Spaces/SequenceSpace.cs">
     <Files>
-      <File FileName="CompactDS/Bitmaps/DiffSetRL2.cs" Line="77" Column="30" />
       <File FileName="SimilaritySearch/Spaces/SequenceSpace.cs" Line="24" Column="1" />
-      <File FileName="CompactDS/SequenceBuilders.cs" Line="197" Column="64" />
-      <File FileName="CompactDS/BitmapBuilders.cs" Line="202" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -13,11 +10,12 @@
           <Node name="natix" expanded="True">
             <Node name="CompactDS" expanded="True">
               <Node name="Sequences" expanded="True" />
-              <Node name="BitmapBuilders.cs" selected="True" />
             </Node>
             <Node name="SimilaritySearch" expanded="True">
               <Node name="Indexes" expanded="True" />
-              <Node name="Spaces" expanded="True" />
+              <Node name="Spaces" expanded="True">
+                <Node name="SequenceSpace.cs" selected="True" />
+              </Node>
             </Node>
           </Node>
         </State>
