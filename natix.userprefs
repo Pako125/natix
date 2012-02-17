@@ -1,8 +1,9 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="SimilaritySearch/Spaces/SequenceSpace.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="SimilaritySearch/Indexes/LC_PFixedM.cs">
     <Files>
       <File FileName="SimilaritySearch/Spaces/SequenceSpace.cs" Line="24" Column="1" />
+      <File FileName="SimilaritySearch/Indexes/LC_PFixedM.cs" Line="140" Column="4" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -12,10 +13,10 @@
               <Node name="Sequences" expanded="True" />
             </Node>
             <Node name="SimilaritySearch" expanded="True">
-              <Node name="Indexes" expanded="True" />
-              <Node name="Spaces" expanded="True">
-                <Node name="SequenceSpace.cs" selected="True" />
+              <Node name="Indexes" expanded="True">
+                <Node name="LC_PFixedM.cs" selected="True" />
               </Node>
+              <Node name="Spaces" expanded="True" />
             </Node>
           </Node>
         </State>
