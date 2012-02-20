@@ -58,7 +58,7 @@ namespace natix.SimilaritySearch
 				var t_id = Thread.CurrentThread.ManagedThreadId % max_t;
 				var oid = this.build_rest_list [i];
 				if (oid < 0) {
-					lock (this) {
+					lock (R[t_id]) {
 						++nullC [t_id];
 					}
 					return;
