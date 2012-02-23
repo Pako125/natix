@@ -1,4 +1,3 @@
-
 Natix is a polyphasic library implementing state of the art methods in the following areas:
 
 - Similarity search algorithms
@@ -20,5 +19,4 @@ Natix is a polyphasic library implementing state of the art methods in the follo
   - Comparison based algorithms - sorting and searching
   - Adaptive searching/sorting with SkipLists
 
-As part of the distribution, a set of simple applications are bundled.
 The library is primarily designed for experimental testing of algorithms, but it is robust enought to be used in many practical applications. Moreover, it is opensource.
