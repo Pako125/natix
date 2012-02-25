@@ -93,8 +93,9 @@ namespace natix.SimilaritySearch
 			IList<IList<IList<int>>> M = new List<IList<IList<int>>> ();
 			IResult R = this.MainSpace.CreateResult (this.MainSpace.Count, false);
 			R.EnsureUniqueItems ();
+			var cache = new Dictionary<int,double> ();
 			foreach (var I in this.lc_list) {
-				var L = I.PartialSearch (q, radius, R);
+				var L = I.PartialSearch (q, radius, R, cache);
 				M.Add (L);
 			}
 			var C = this.ui_alg.ComputeUI (M);
@@ -112,8 +113,9 @@ namespace natix.SimilaritySearch
 			R.EnsureUniqueItems ();
 			byte[] A = new byte[ this.MainSpace.Count ];
 			var queue = new Queue<IEnumerator<IList<int>>> ();
+			var cache = new Dictionary<int,double> ();
 			foreach (var I in this.lc_list) {
-				var L = I.PartialKNNSearch (q, K, R).GetEnumerator ();
+				var L = I.PartialKNNSearch (q, K, R, cache).GetEnumerator ();
 				if (L.MoveNext ()) {				
 					queue.Enqueue (L);
 				}
