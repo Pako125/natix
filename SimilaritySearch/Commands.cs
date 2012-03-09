@@ -173,6 +173,7 @@ namespace natix.SimilaritySearch
 			bool help = false;
 			bool disthist = true;
 			int showmaxres = 30;
+			string indexclass = null;
 			var config = new Dictionary<string, object> ();
 			
 			OptionSet ops = new OptionSet () {
@@ -182,14 +183,15 @@ namespace natix.SimilaritySearch
 				{ "hidehist", v => disthist = false },
 				{ "names=", v => names = v},
 				{ "showmaxres=", v => showmaxres = int.Parse (v) },
+				{ "indexclass=", v => indexclass = v},
 				{ "h|?|help",   v => help = true },
 				{ "config=", delegate(string v) {
-				var split = v.Split (':');
-				if (split.Length != 2) {
-					throw new ArgumentNullException ("config command options should be in format --config key:value ");
-				}
-				config.Add (split [0], split [1]);
-			}
+						var split = v.Split (':');
+						if (split.Length != 2) {
+							throw new ArgumentNullException ("config command options should be in format --config key:value ");
+						}
+						config.Add (split [0], split [1]);
+					}
 				}
 			};
 			
@@ -206,7 +208,7 @@ namespace natix.SimilaritySearch
 				throw new ArgumentException (String.Format ("Some required arguments wasn't specified index: {0}, queries: {0}", index, queries));
 			}
 			if (indexObject == null) {
-				indexObject = IndexLoader.Load (index, null, config);
+				indexObject = IndexLoader.Load (index, indexclass, config);
 			} else {
 				index = String.Format ("<memory:{0}>", indexObject.ToString ());
 			}

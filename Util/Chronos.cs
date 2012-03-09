@@ -107,7 +107,7 @@ namespace natix
 		}
 
 		/// <summary>
-		/// Prints the statsto Output (appending a prefix)
+		/// Prints the stats to Output (appending a prefix)
 		/// </summary>
 		public void PrintStats (string prefix, TextWriter Output)
 		{
