@@ -49,9 +49,6 @@ namespace natix.CompactDS
 			if (bitmap_builder == null) {
 				bitmap_builder = BitmapBuilders.GetSArray64 ();
 			}
-			//var sa = new SArray64 ();
-			//sa.Build (L, n * sigma);
-			//this.xl_bitmap = sa;
 			this.xl_bitmap = bitmap_builder (L, n * sigma);
 			// now building the permutation for access
 			var p = new ListGen_MRRR ();
@@ -140,14 +137,30 @@ namespace natix.CompactDS
 				return (int)this.xl_bitmap.Select1 (_rank);
 			}
 			long pos = symbol * ((long)this.Count);
-			var rank = this.xl_bitmap.Rank1 (pos-1);
+			var rank = this.xl_bitmap.Rank1 (pos - 1);
 			var p = this.xl_bitmap.Select1 (rank + _rank) - pos;
+			return (int)p;
+		}
+		
+		public int Select (int symbol, int _rank, UnraveledSymbolXLB unraveled_ctx)
+		{
+			if (_rank < 1) {
+				return -1;
+			}
+			if (symbol == 0) {
+				return (int)this.xl_bitmap.Select1 (_rank);
+			}
+			long pos = symbol * ((long)this.Count);
+			if (unraveled_ctx.prevrank == int.MinValue) {
+				unraveled_ctx.prevrank = (int)this.xl_bitmap.Rank1 (pos - 1);
+			}
+			var p = this.xl_bitmap.Select1 (unraveled_ctx.prevrank + _rank) - pos;
 			return (int)p;
 		}
 		
 		public IRankSelect Unravel (int symbol)
 		{
-			return new UnraveledSymbol(this, symbol);
+			return new UnraveledSymbolXLB(this, symbol);
 		}
 	}
 }

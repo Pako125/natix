@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using NDesk.Options;
 using natix.CompactDS;
 using natix.SortingSearching;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace natix.SimilaritySearch
@@ -82,16 +83,22 @@ namespace natix.SimilaritySearch
 		{
 			var sp = this.MainSpace;
 			int len = this.CENTERS.Count;
-			var C = this.MainSpace.CreateResult (len, false);
-			//for (int center = 0; center < len; center++) {
+			int t_max = 16;
+			var C = new IResult[t_max];
+			for (int i = 0; i < t_max; ++i) {
+				C [i] = this.MainSpace.CreateResult (len, false);
+			}
 			Action<int> S = delegate(int center) {
+				var t_id = Thread.CurrentThread.ManagedThreadId % t_max;
 				var dcq = sp.Dist (this.MainSpace [this.CENTERS [center]], q);
-				lock (C) {
+				lock (R) {
 					R.Push (this.CENTERS [center], dcq);
-					//var rm = Math.Abs (dcq - this.COV [center]);
-					if (dcq <= R.CoveringRadius + this.COV [center]) {
-						// if (rm <= R.CoveringRadius) {
-						C.Push (center, dcq);
+				}
+				//var rm = Math.Abs (dcq - this.COV [center]);
+				if (dcq <= R.CoveringRadius + this.COV [center]) {
+					// if (rm <= R.CoveringRadius) {
+					lock (C[t_id]) {
+						C [t_id].Push (center, dcq);
 					}
 					// C.Push (center, rm);
 				}
@@ -118,7 +125,9 @@ namespace natix.SimilaritySearch
 			};
 			pops = new ParallelOptions ();
 			pops.MaxDegreeOfParallelism = -1;
-			Parallel.ForEach<ResultPair> (C, pops, Scenters);
+			foreach (var _C in C) {
+				Parallel.ForEach<ResultPair> (_C, pops, Scenters);
+			}
 			return R;
 		}
 		

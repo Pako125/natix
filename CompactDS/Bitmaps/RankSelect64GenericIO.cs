@@ -32,7 +32,8 @@ namespace natix.CompactDS
 		/// </summary>
 		static List<Type> Catalog = new List<Type>() {
 			typeof(SArray64),
-			typeof(DiffSetRL2_64)
+			typeof(DiffSetRL2_64),
+			typeof(DiffSet64)
 		};
 
 		/// <summary>

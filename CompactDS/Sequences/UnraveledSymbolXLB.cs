@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/CompactDS/Sequences/UnraveledSymbol.cs
+//   Original filename: natix/CompactDS/Sequences/UnraveledSymbolXLB.cs
 // 
 using System;
 using System.IO;
@@ -23,11 +23,12 @@ namespace natix.CompactDS
 	/// <summary>
 	/// Unraveled symbol 
 	/// </summary>
-	public class UnraveledSymbol : RankSelectBase
+	public class UnraveledSymbolXLB : RankSelectBase
 	{
-		IRankSelectSeq seqindex;
-		int symbol;
-	
+		SeqXLB seqindex;
+		public int symbol;
+		public int prevrank;
+
 		/// <summary>
 		/// Asserts the equality.
 		/// </summary>
@@ -57,10 +58,11 @@ namespace natix.CompactDS
 		/// Creates an unraveled symbol using "_symbol" over "_seqindex"
 		/// </summary>
 
-		public UnraveledSymbol (IRankSelectSeq _seqindex, int _symbol)
+		public UnraveledSymbolXLB (SeqXLB _seqindex, int _symbol)
 		{
 			this.seqindex = _seqindex;
 			this.symbol = _symbol;
+			this.prevrank = int.MinValue;
 		}
 		
 		/// <summary>
@@ -72,19 +74,23 @@ namespace natix.CompactDS
 			}
 		}
 		
+		int count1 = int.MinValue;
 		/// <summary>
 		/// The number of enabled bits in this bitmap
 		/// </summary>
 		public override int Count1 {
 			get {
-				return this.seqindex.Rank (this.symbol, this.Count - 1);
+				if (this.count1 == int.MinValue) {
+					this.count1 = this.seqindex.Rank (this.symbol, this.Count - 1);
+				}
+				return this.count1;
 			}
 		}
 		
 		/// <summary>
 		/// Access to the bit at position "pos"
 		/// </summary>
-		public override bool Access(int pos)
+		public override bool Access (int pos)
 		{
 			return this.symbol == this.seqindex.Access (pos);
 		}
@@ -103,7 +109,7 @@ namespace natix.CompactDS
 		/// </summary>
 		public override int Select1 (int rank)
 		{
-			return this.seqindex.Select (this.symbol, rank);
+			return this.seqindex.Select (this.symbol, rank, this);
 		}
 
 	}

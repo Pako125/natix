@@ -30,7 +30,7 @@ namespace natix.CompactDS
 	{
 		// static IIntegerEncoder Coder = new EliasDelta ();
 		static int AccStart = -1;
-		static int PLAIN_SAMPLES_THRESHOLD = 32;
+		//static int PLAIN_SAMPLES_THRESHOLD = 32;
 		protected IIEncoder64 Coder;
 		protected BitStream32 Stream;
 		protected long N;
@@ -75,7 +75,7 @@ namespace natix.CompactDS
 			IEncoder64GenericIO.Save (Output, this.Coder);
 			//Console.WriteLine ("xxxxxx  save samples.count {0}. N: {1}, M: {2}, B: {3}, BitCount: {4}",
 			//	this.Samples.Count, this.N, this.M, this.B, this.Stream.CountBits);
-			if (this.Samples.Count > PLAIN_SAMPLES_THRESHOLD) {
+			/*if (this.Samples.Count > PLAIN_SAMPLES_THRESHOLD) {
 				{
 					var sa = new SArray64 ();
 					sa.Build (this.Samples);
@@ -86,10 +86,10 @@ namespace natix.CompactDS
 					sa.Build (this.Offsets);
 					sa.Save (Output);
 				}
-			} else {
+			} else {*/
 				PrimitiveIO<long>.WriteVector (Output, this.Samples);
 				PrimitiveIO<int>.WriteVector (Output, this.Offsets);
-			}
+			//}
 			this.Stream.Save (Output);
 		}
 	
@@ -101,7 +101,7 @@ namespace natix.CompactDS
 			this.B = Input.ReadInt16 ();
 			this.Coder = IEncoder64GenericIO.Load (Input);
 			int num_samples = this.M / this.B;
-			if (num_samples > PLAIN_SAMPLES_THRESHOLD) {
+			/*if (num_samples > PLAIN_SAMPLES_THRESHOLD) {
 				{
 					var sa = new SArray64 ();
 					sa.Load (Input);
@@ -112,12 +112,12 @@ namespace natix.CompactDS
 					sa.Load (Input);
 					this.Offsets = new SortedListSArray (sa);
 				}
-			} else {
+			} else {*/
 				this.Samples = new long[ num_samples ];
 				this.Offsets = new int[ num_samples ];
 				PrimitiveIO<long>.ReadFromFile (Input, num_samples, this.Samples);
 				PrimitiveIO<int>.ReadFromFile (Input, num_samples, this.Offsets);
-			}
+			//}
 			// POS = R.BaseStream.Position - POS;
 			// Console.WriteLine("=======*******=======>> POS: {0}", POS);
 			this.Stream = new BitStream32 ();
@@ -322,23 +322,27 @@ namespace natix.CompactDS
 			}
 		}
 		
-		public void Build (IList<long> orderedList, short b)
+		public void Build (IList<long> orderedList, short b, IIEncoder64 coder = null)
 		{
 			long n = 0;
 			if (orderedList.Count > 0) {
 				n = orderedList[orderedList.Count - 1] + 1;
 			}
-			this.Build (orderedList, n, b);
+			this.Build (orderedList, n, b, coder);
 		}
 		
 		/// <summary>
 		///  build methods
 		/// </summary>
-		public void Build (IEnumerable<long> orderedList, long n, short b)
+		public void Build (IEnumerable<long> orderedList, long n, short b, IIEncoder64 coder = null)
 		{
 			this.N = n;
 			this.B = b;
 			this.M = 0;
+			if (coder == null) {
+				coder = new DoublingSearchCoding64 ();
+			}
+			this.Coder = coder;
 			long prev = -1;
 			var ctx = new BitStreamCtxRL ();
 	
@@ -370,21 +374,6 @@ namespace natix.CompactDS
 			/*for (int i = 0; i < this.Samples.Count; i++) {
 				Console.WriteLine ("-- i: {0}, samples: {1}, offset: {2}", i, Samples[i], Offsets[i]);
 			}*/
-		}
-	
-		public IEnumerable<long> iterate (IBitStream bitstream)
-		{
-			// Console.WriteLine ("count: {0}, bitstream: {1}", bitstream.CountBits, bitstream);
-			for (int i = 0; i < bitstream.CountBits; i++) {
-				if (bitstream[i]) {
-					yield return i;
-				}
-			}			
-		}
-		
-		public void Build (IBitStream bitstream, short b)
-		{
-			this.Build (iterate (bitstream), (int)bitstream.CountBits, b);
-		}
+		}	
 	}
 }

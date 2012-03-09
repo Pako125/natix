@@ -244,7 +244,7 @@ namespace natix.CompactDS
 		}
 
 		public long Select1_UnraveledSymbol (long _rank, long pos_rank)
-		{
+		{ 
 			if (_rank <= 0) {
 				return -1;
 			}
