@@ -28,7 +28,8 @@ namespace natix.CompactDS
 		SeqXLB seqindex;
 		public int symbol;
 		public int prevrank;
-
+		public object ctx;
+		
 		/// <summary>
 		/// Asserts the equality.
 		/// </summary>
@@ -95,13 +96,12 @@ namespace natix.CompactDS
 			return this.symbol == this.seqindex.Access (pos);
 		}
 		
-		
 		/// <summary>
 		/// Rank1
 		/// </summary>
 		public override int Rank1 (int pos)
 		{
-			return this.seqindex.Rank (this.symbol, pos);
+			return this.seqindex.Rank (this.symbol, pos, this);
 		}
 		
 		/// <summary>

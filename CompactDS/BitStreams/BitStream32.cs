@@ -374,7 +374,6 @@ namespace natix.CompactDS
 					c += numbits;
 					continue;
 				}
-				// Console.WriteLine ("+++ u: {0}, numbits: {1}", u, numbits);
 				int pos = BitAccess.Select1 (u, 1);
 				ctx.Offset -= numbits - pos;
 				c += pos;

@@ -295,6 +295,8 @@
     <Compile Include="CompactDS\Bitmaps\RankSelect64GenericIO.cs" />
     <Compile Include="CompactDS\Bitmaps\DiffSet64.cs" />
     <Compile Include="CompactDS\Sequences\UnraveledSymbolXLB.cs" />
+    <Compile Include="CompactDS\IntCoders\BinaryCodes\EliasGamma64.cs" />
+    <Compile Include="CompactDS\IntCoders\BinaryCodes\EliasDelta64.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -323,7 +325,6 @@
     <Folder Include="CompactDS\Lists\Unsorted\" />
     <Folder Include="Sets\" />
     <Folder Include="Sets\Intersection\" />
-    <Folder Include="Intersection\" />
     <Folder Include="Numeric\" />
     <Folder Include="CompactDS\IntCoders\" />
     <Folder Include="CompactDS\IntCoders\SearchingCodesBinary\" />

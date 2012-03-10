@@ -29,7 +29,9 @@ namespace natix.CompactDS
 		public static List<Type> Catalog = new List<Type>() {
 			typeof(BinarySearchCoding64),
 			typeof(DoublingSearchCoding64),
-			typeof(UltimateSearchCoding64)
+			typeof(UltimateSearchCoding64),
+			typeof(EliasGamma64),
+			typeof(EliasDelta64)
 		};
 		
 		/// <summary>

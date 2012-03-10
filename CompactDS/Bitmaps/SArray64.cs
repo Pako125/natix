@@ -190,23 +190,14 @@ namespace natix.CompactDS
 				return 0L;
 			}
 			int rank0_prev = 1 + (int)(pos >> this.GetNumLowerBits ());
-			//Console.WriteLine ("XXXXXXXX ========== ");
-			//Console.WriteLine ("XXXXXXXX SArray64.Rank1 pos: {0}, rank0_prev: {1}, lower-bits: {2}, m: {3}, n: {4}",
-			//                   pos, rank0_prev, this.GetNumLowerBits (), this.Count1, this.Count);
 			int pos_prev = this.H.Select0 (rank0_prev);
 			// Remember that $pos = rank0 + rank1 - 1$, thus $rank1 = pos - rank0 + 1$
 			//int rank1_prevX = this.H.Rank1 (pos_prev); // prevcount = rank1
 			int rank1_prev = pos_prev + 1 - rank0_prev;
-			//Console.WriteLine ("XXXXXXXX SArray64.Rank1 H.Count: {0}, H.Count1: {1}, rank0_prev: {2}",
-			//                   this.H.Count, this.H.Count1, rank0_prev);
 			int pos_next = this.H.Select0 (rank0_prev + 1);
 			int rank1_next = pos_next - rank0_prev;
 			uint pos_masked = (uint)(this.get_mask () & pos);
 			int count = rank1_next - rank1_prev;
-			//Console.WriteLine ("XXXXXXXX SArray64.Rank1 pos_next: {0}, pos_prev: {1}, rank1_next: {2}, rank1_prev: {3}",
-			//                   pos_next, pos_prev, rank1_next, rank1_prev);
-			//Console.WriteLine ("XXXXXXXX SArray64.Rank1 pos_masked: {0}", pos_masked);
-
 			if (count < 128) {
 				// if (true) {
 				// sequential search
@@ -241,22 +232,6 @@ namespace natix.CompactDS
 			long ell = this.L [rank - 1];
 			return high_weight | ell;
 			//return (high_weight << this.GetNumLowerBits ()) | ((long)this.L [rank - 1]);
-		}
-
-		public long Select1_UnraveledSymbol (long _rank, long pos_rank)
-		{ 
-			if (_rank <= 0) {
-				return -1;
-			}
-			int rank = (int)_rank;
-			if (pos_rank == long.MinValue) {
-				pos_rank = this.H.Select1 (rank);
-			}
-			// int high_weight = this.H.Rank0 (pos_rank) - 1;
-			long high_weight = pos_rank - rank;
-			high_weight <<= this.GetNumLowerBits ();
-			long ell = this.L [rank - 1];
-			return high_weight | ell;
 		}
 		
 		public ListGenerator64<long> GetAsIList ()

@@ -123,11 +123,9 @@ namespace natix.CompactDS
 			long pos = symbol * ((long)this.Count);
 			var rank_a = this.xl_bitmap.Rank1 (pos + _pos);
 			var rank_b = this.xl_bitmap.Rank1 (pos - 1);
-			//Console.WriteLine ("XXXXX> symbol: {0}, n: {1}, _pos: {2}, pos: {3}, rank_a: {4}, rank_b: {5}, rank: {6}",
-			//                   symbol, this.Count, _pos, pos, rank_a, rank_b, rank_a - rank_b);
 			return (int)(rank_a - rank_b);
 		}
-		
+
 		public int Select (int symbol, int _rank)
 		{
 			if (_rank < 1) {
@@ -142,6 +140,22 @@ namespace natix.CompactDS
 			return (int)p;
 		}
 		
+		public int Rank (int symbol, int _pos, UnraveledSymbolXLB unraveled_ctx)
+		{
+			if (_pos < 0) {
+				return 0;
+			}
+			if (symbol == 0) {
+				return (int)this.xl_bitmap.Rank1 (_pos);
+			}
+			long pos = symbol * ((long)this.Count);
+			if (unraveled_ctx.prevrank == int.MinValue) {
+				unraveled_ctx.prevrank = (int)this.xl_bitmap.Rank1 (pos - 1);
+			}
+			var rank_a = this.xl_bitmap.Rank1 (pos + _pos);
+			return (int)(rank_a - unraveled_ctx.prevrank);
+		}
+
 		public int Select (int symbol, int _rank, UnraveledSymbolXLB unraveled_ctx)
 		{
 			if (_rank < 1) {
@@ -154,13 +168,14 @@ namespace natix.CompactDS
 			if (unraveled_ctx.prevrank == int.MinValue) {
 				unraveled_ctx.prevrank = (int)this.xl_bitmap.Rank1 (pos - 1);
 			}
-			var p = this.xl_bitmap.Select1 (unraveled_ctx.prevrank + _rank) - pos;
+			var p = this.xl_bitmap.Select1 (unraveled_ctx.prevrank + _rank, unraveled_ctx) - pos;
 			return (int)p;
 		}
 		
 		public IRankSelect Unravel (int symbol)
 		{
 			return new UnraveledSymbolXLB(this, symbol);
+			// return new UnraveledSymbol (this, symbol);
 		}
 	}
 }

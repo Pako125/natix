@@ -25,6 +25,20 @@ namespace natix.CompactDS
 {
 	public class DiffSet64 : RankSelectBase64
 	{
+		public class Context
+		{
+			public BitStreamCtx ctx;
+			public long prev_arg;
+			public long prev_res;
+
+			public Context (long prev_arg, BitStreamCtx ctx)
+			{
+				this.ctx = ctx;
+				this.prev_arg = prev_arg;
+				this.prev_res = long.MinValue;
+			}
+		}
+
 		static int AccStart = -1;
 		public BitStream32 Stream;
 		protected IIEncoder64 Coder;
@@ -200,7 +214,27 @@ namespace natix.CompactDS
 		/// </summary>
 		public override long Select1 (long rank)
 		{
-			return this.BackendSelect1 ((int)rank, new BitStreamCtx());
+			return this.BackendSelect1 ((int)rank, new BitStreamCtx ());
+		}
+
+		public override long Select1 (long rank, UnraveledSymbolXLB unraveled_ctx)
+		{
+			Context ctx = unraveled_ctx.ctx as Context;
+			if (ctx == null || ctx.prev_arg + (this.B * 2) < rank) {
+				if (ctx == null) {
+					var bctx = new BitStreamCtx ();
+					unraveled_ctx.ctx = ctx = new Context (rank, bctx);
+				}
+				ctx.prev_res = this.BackendSelect1 ((int)rank, ctx.ctx);
+			} else {
+				int left = (int)(rank - ctx.prev_arg);
+				for (int i = 0; i < left; i++) {
+					long read = this.ReadNext (ctx.ctx);
+					ctx.prev_res += read;
+				}
+			}
+			ctx.prev_arg = rank;
+			return ctx.prev_res;
 		}
 
 		/// <summary>

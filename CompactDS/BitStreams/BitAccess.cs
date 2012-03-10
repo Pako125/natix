@@ -301,7 +301,19 @@ namespace natix.CompactDS
 			}
 			return log2;
 		}
-		
+
+		public static int Log2 (long u)
+		{
+			// another option for this function is computing using tables,
+			// hopping for registers.
+			int log2 = 0;
+			while (u > 0) {
+				u >>= 1;
+				++log2;
+			}
+			return log2;
+		}
+
 		/// <summary>
 		/// Prints u as a bit string
 		/// </summary>
@@ -318,5 +330,23 @@ namespace natix.CompactDS
 			}
 			return w.ToString ();
 		}
+		
+		/// <summary>
+		/// Prints u as a bit string
+		/// </summary>
+		public static string ToAsciiString (ulong u)
+		{
+			StringWriter w = new StringWriter ();
+			for (int i = 0; i < 64; i++) {
+				if ((u & 1) == 1) {
+					w.Write ("1");
+				} else {
+					w.Write ("0");
+				}
+				u >>= 1;
+			}
+			return w.ToString ();
+		}
+
 	}
 }

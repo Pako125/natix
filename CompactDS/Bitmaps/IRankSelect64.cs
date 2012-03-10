@@ -61,6 +61,18 @@ namespace natix.CompactDS
 		/// </summary>
 		bool Access (long pos);
 		/// <summary>
+		/// Select1, but using ctx as context. Optimization for SeqXLB
+		/// </summary>
+		long Select1 (long rank1, UnraveledSymbolXLB ctx);
+		/// <summary>
+		/// Rank, but using ctx as context. Optimization for SeqXLB
+		/// </summary>
+		long Rank1 (long pos, UnraveledSymbolXLB ctx);
+		/// <summary>
+		/// Access but using ctx as context. Optimization for SeqXLB
+		/// </summary>
+		bool Access (long pos, UnraveledSymbolXLB ctx);
+		/// <summary>
 		/// Asserts the equality.
 		/// </summary>
 		void AssertEquality (IRankSelect64 other);

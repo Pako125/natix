@@ -37,6 +37,21 @@ namespace natix.CompactDS
 		
 		public abstract void AssertEquality (IRankSelect64 other);
 		
+		public virtual long Select1 (long rank, UnraveledSymbolXLB ctx)
+		{
+			return this.Select1 (rank);
+		}
+		
+		public virtual long Rank1 (long pos, UnraveledSymbolXLB ctx)
+		{
+			return this.Rank1 (pos);
+		}
+		
+		public virtual bool Access (long pos, UnraveledSymbolXLB ctx)
+		{
+			return this.Access(pos);
+		}
+		
 		public virtual bool this[long pos]
 		{
 			get {
