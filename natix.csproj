@@ -297,6 +297,7 @@
     <Compile Include="CompactDS\Sequences\UnraveledSymbolXLB.cs" />
     <Compile Include="CompactDS\IntCoders\BinaryCodes\EliasGamma64.cs" />
     <Compile Include="CompactDS\IntCoders\BinaryCodes\EliasDelta64.cs" />
+    <Compile Include="CompactDS\Bitmaps\DiffSetRL64.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

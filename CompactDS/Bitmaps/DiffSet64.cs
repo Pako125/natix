@@ -27,11 +27,11 @@ namespace natix.CompactDS
 	{
 		public class Context
 		{
-			public BitStreamCtx ctx;
+			public BitStreamCtxRL ctx;
 			public long prev_arg;
 			public long prev_res;
 
-			public Context (long prev_arg, BitStreamCtx ctx)
+			public Context (long prev_arg, BitStreamCtxRL ctx)
 			{
 				this.ctx = ctx;
 				this.prev_arg = prev_arg;
@@ -64,7 +64,7 @@ namespace natix.CompactDS
 		public override bool Access(long pos)
 		{
 			long found_pos;
-			this.BackendAccessRank1 (pos, out found_pos, new BitStreamCtx());
+			this.BackendAccessRank1 (pos, out found_pos, new BitStreamCtxRL());
 			return pos == found_pos;
 		}
 		
@@ -157,7 +157,7 @@ namespace natix.CompactDS
 			
 		}
 
-		protected virtual long ReadNext (BitStreamCtx ctx)
+		protected virtual long ReadNext (BitStreamCtxRL ctx)
 		{
 			return Coder.Decode (this.Stream, ctx);
 		}
@@ -178,7 +178,7 @@ namespace natix.CompactDS
 			if (rank == 1) {
 				return this.Select1 (rank);
 			}
-			BitStreamCtx ctx = new BitStreamCtx ();
+			var ctx = new BitStreamCtxRL ();
 			this.BackendSelect1 (rank - 1, ctx);
 			return this.ReadNext (ctx);
 		}
@@ -190,7 +190,7 @@ namespace natix.CompactDS
 		public long ExtractFrom (int start_index, int count, IList<long> output)
 		{
 			long acc;
-			BitStreamCtx ctx = new BitStreamCtx ();
+			var ctx = new BitStreamCtxRL ();
 			if (start_index == 0) {
 				this.ResetReader ();
 				acc = -1;
@@ -214,7 +214,7 @@ namespace natix.CompactDS
 		/// </summary>
 		public override long Select1 (long rank)
 		{
-			return this.BackendSelect1 ((int)rank, new BitStreamCtx ());
+			return this.BackendSelect1 ((int)rank, new BitStreamCtxRL ());
 		}
 
 		public override long Select1 (long rank, UnraveledSymbolXLB unraveled_ctx)
@@ -222,7 +222,7 @@ namespace natix.CompactDS
 			Context ctx = unraveled_ctx.ctx as Context;
 			if (ctx == null || ctx.prev_arg + (this.B * 2) < rank) {
 				if (ctx == null) {
-					var bctx = new BitStreamCtx ();
+					var bctx = new BitStreamCtxRL ();
 					unraveled_ctx.ctx = ctx = new Context (rank, bctx);
 				}
 				ctx.prev_res = this.BackendSelect1 ((int)rank, ctx.ctx);
@@ -240,7 +240,7 @@ namespace natix.CompactDS
 		/// <summary>
 		/// Unlocked Select1 useful to some lowlevel operations
 		/// </summary>
-		long BackendSelect1 (int rank, BitStreamCtx ctx)
+		long BackendSelect1 (int rank, BitStreamCtxRL ctx)
 		{
 			if (rank < 1) {
 				return -1;
@@ -266,7 +266,7 @@ namespace natix.CompactDS
 			return acc;
 		}
 		
-		long SeqAccessRank1 (long acc, long pos, int max, out long found_pos, BitStreamCtx ctx)
+		long SeqAccessRank1 (long acc, long pos, int max, out long found_pos, BitStreamCtxRL ctx)
 		{
 			int i = 0;
 			while (i < max && acc < pos) {
@@ -285,11 +285,11 @@ namespace natix.CompactDS
 		public override long Rank1 (long pos)
 		{
 			long select_pos;
-			long rank = this.BackendAccessRank1 (pos, out select_pos, new BitStreamCtx());
+			long rank = this.BackendAccessRank1 (pos, out select_pos, new BitStreamCtxRL());
 			return rank;
 		}
 		
-		long BackendAccessRank1 (long pos, out long found_pos, BitStreamCtx ctx)
+		long BackendAccessRank1 (long pos, out long found_pos, BitStreamCtxRL ctx)
 		{
 			if (pos < 0) {
 				found_pos = -1;
