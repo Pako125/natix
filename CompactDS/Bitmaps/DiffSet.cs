@@ -300,19 +300,18 @@ namespace natix.CompactDS
 			if (current == 0) {
 				prev = AccStart;
 			}
-			lock (this.Stream) {
-				this.WriteNewDiff (current - prev);
-				this.M++;
-				if (this.M % this.B == 0) {
-					this.Commit ();
-					this.Samples.Add (current);
-					this.Offsets.Add ((int)this.Stream.CountBits);
-					//Console.WriteLine ("ADDING SAMPLE M: {0}, current: {1}, prev: {2}, num-samples: {3}",
-					//	this.M, current, prev, this.Samples.Count);
+
+			this.WriteNewDiff (current - prev);
+			this.M++;
+			if (this.M % this.B == 0) {
+				this.Commit ();
+				this.Samples.Add (current);
+				this.Offsets.Add ((int)this.Stream.CountBits);
+				//Console.WriteLine ("ADDING SAMPLE M: {0}, current: {1}, prev: {2}, num-samples: {3}",
+				//	this.M, current, prev, this.Samples.Count);
 				}
-				if (current >= this.N) {
-					this.N = current + 1;
-				}
+			if (current >= this.N) {
+				this.N = current + 1;
 			}
 		}
 		

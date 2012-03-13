@@ -29,7 +29,7 @@ namespace natix.CompactDS
 	{
 		// static INumericManager<T> Num = (INumericManager<T>)NumericManager.Get (typeof(T));
 		IIEncoder32 Coder = null;
-		BitStream32 CoderStream;
+		// BitStream32 CoderStream;
 		WaveletInner Root;
 		IList<WaveletLeaf> Alphabet;
 		
@@ -52,7 +52,7 @@ namespace natix.CompactDS
 		
 		public WaveletTree ()
 		{
-			this.CoderStream = new BitStream32 (8);
+			// this.CoderStream = new BitStream32 (8);
 			this.BitmapBuilder = BitmapBuilders.GetGGMN_wt (16);
 		}
 		
@@ -79,14 +79,15 @@ namespace natix.CompactDS
 		
 		protected void Add (int symbol)
 		{
-			this.CoderStream.Clear ();
-			this.Coder.Encode (this.CoderStream, symbol);
+			var coderstream = new BitStream32 ();
+			coderstream.Clear ();
+			this.Coder.Encode(coderstream, symbol);
 			var ctx = new BitStreamCtx (0);
 			// this.CoderStream.Seek (0);
-			int numbits = (int)this.CoderStream.CountBits;
+			int numbits = (int)coderstream.CountBits;
 			var node = this.Root;
 			for (int b = 0; b < numbits; b++) {
-				var bitcode = this.CoderStream.Read (ctx);
+				var bitcode = coderstream.Read (ctx);
 				(node.B as FakeBitmap).Write (bitcode);
 				if (bitcode) {
 					if (numbits == b + 1) {
@@ -227,14 +228,14 @@ namespace natix.CompactDS
 
 		public int Rank (int symbol, int position)
 		{
-			this.CoderStream.Clear ();
-			this.Coder.Encode (this.CoderStream, symbol);
+			var coderstream = new BitStream32 ();
+			this.Coder.Encode (coderstream, symbol);
 			//this.CoderStream.Seek (0);
 			var ctx = new BitStreamCtx (0);
-			int numbits = (int)this.CoderStream.CountBits;
+			int numbits = (int)coderstream.CountBits;
 			var node = this.Root;
 			for (int i = 0; i < numbits; i++) {
-				bool b = this.CoderStream.Read (ctx);
+				bool b = coderstream.Read (ctx);
 				if (b) {
 					position = node.B.Rank1 (position) - 1;
 					if (i + 1 < numbits) {
@@ -255,16 +256,16 @@ namespace natix.CompactDS
 
 		public int Select (int symbol, int rank)
 		{
-			this.CoderStream.Clear ();
-			this.Coder.Encode (this.CoderStream, symbol);
-			int numbits = (int)this.CoderStream.CountBits;
+			var coderstream = new BitStream32 ();
+			this.Coder.Encode (coderstream, symbol);
+			int numbits = (int)coderstream.CountBits;
 			var symnode = this.Alphabet [symbol];
 			if (symnode == null || symnode.Count < rank) {
 				return -1;
 			}
 			WaveletInner node = symnode.Parent as WaveletInner;
 			for (--numbits; numbits >= 0; numbits--) {
-				bool b = CoderStream [numbits];
+				bool b = coderstream [numbits];
 				if (b) {
 					rank = node.B.Select1 (rank) + 1;
 				} else {

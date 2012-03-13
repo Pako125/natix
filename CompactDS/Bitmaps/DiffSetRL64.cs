@@ -42,17 +42,16 @@ namespace natix.CompactDS
 
 		protected override long ReadNext (BitStreamCtxRL ctx)
 		{
-			if (_run_len_add > 0) {
-				_run_len_add--;
+			if (ctx.run_len > 0) {
+				ctx.run_len--;
 				return 1L;
 			}
 			long d = base.ReadNext (ctx);
 			if (d == 1L) {
-				_run_len_add = (int)(base.ReadNext (ctx) - 1);
+				ctx.run_len = (int)(base.ReadNext (ctx) - 1);
 			}
 			return d;
 		}
-		
 		
 		protected override void WriteNewDiff (long u)
 		{
@@ -64,9 +63,9 @@ namespace natix.CompactDS
 			}
 		}
 		
-		protected override void ResetReader ()
+		protected override void ResetReader (BitStreamCtxRL ctx)
 		{
-			this._run_len_add = 0;
+			ctx.run_len = 0;
 		}
 
 		public override void Commit ()

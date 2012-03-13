@@ -82,23 +82,17 @@ namespace natix.CompactDS
 
 		public override void Add (int item)
 		{
-			lock (this.Stream) {
-				this.Coder.ArrayAdd (this.Stream, item);
-			}
+			this.Coder.ArrayAdd (this.Stream, item);
 		}
 		
 		public override int GetItem (int index)
 		{
-			lock (this.Stream) {
-				return this.Coder.ArrayGet (this.Stream, index);
-			}
+			return this.Coder.ArrayGet (this.Stream, index);
 		}
 		
 		public override void SetItem (int index, int u)
 		{
-			lock (this.Stream) {
-				this.Coder.ArraySet (this.Stream, index, u);
-			}
+			this.Coder.ArraySet (this.Stream, index, u);
 		}
 	}
 }

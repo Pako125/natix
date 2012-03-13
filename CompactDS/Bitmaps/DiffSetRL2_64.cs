@@ -45,7 +45,7 @@ namespace natix.CompactDS
 			this.Samples = new List<long> ();
 			this.Offsets = new List<int> ();
 			this.Stream = new BitStream32 ();
-			this.Coder = new DoublingSearchCoding64 ();
+			this.Coder = new EliasDelta64 ();
 		}
 		
 		/*public DiffSetRL2_64 (short B, IIntegerEncoder) : this()
@@ -340,7 +340,7 @@ namespace natix.CompactDS
 			this.B = b;
 			this.M = 0;
 			if (coder == null) {
-				coder = new DoublingSearchCoding64 ();
+				coder = new EliasDelta64 ();
 			}
 			this.Coder = coder;
 			long prev = -1;

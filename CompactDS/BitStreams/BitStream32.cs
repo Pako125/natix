@@ -195,13 +195,11 @@ namespace natix.CompactDS
 
 		public void Write (bool x)
 		{
-			lock (this.Buffer) {
-				if ((this.N >> 5) >= this.Buffer.Count) {
-					this.Buffer.Add (0);
-				}
-				this[this.N] = x;
-				++this.N;
+			if ((this.N >> 5) >= this.Buffer.Count) {
+				this.Buffer.Add (0);
 			}
+			this[this.N] = x;
+			++this.N;
 		}
 
 		public void Write (bool x, int times)

@@ -196,7 +196,16 @@ namespace natix.CompactDS
 				return rs;
 			};
 		}
-		
+
+		public static BitmapFromList64 GetDiffSetRL64 (short b, IIEncoder64 coder = null)
+		{
+			return delegate (IList<long> L, long n) {
+				var rs = new DiffSetRL64 ();
+				rs.Build (L, n, b, coder);
+				return rs;
+			};
+		}
+
 		public static BitmapFromList64 GetDiffSetRL2_64 (short b, IIEncoder64 coder = null)
 		{
 			return delegate (IList<long> L, long n) {

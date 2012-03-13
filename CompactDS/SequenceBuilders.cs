@@ -192,6 +192,14 @@ namespace natix.CompactDS
 			return GetSeqXLB (t, BitmapBuilders.GetDiffSet64 (b, coder));
 		}
 		
+		public static SequenceBuilder GetSeqXLB_DiffSetRL64 (short t = 16, short b = 127, IIEncoder64 coder = null)
+		{
+			if (coder == null) {
+				coder = new EliasDelta64 ();
+			}
+			return GetSeqXLB (t, BitmapBuilders.GetDiffSetRL64 (b, coder));
+		}
+		
 		public static SequenceBuilder GetSeqXLB_DiffSetRL2_64 (short t = 16, short b = 127, IIEncoder64 coder = null)
 		{
 			if (coder == null) {

@@ -79,15 +79,13 @@ namespace natix.CompactDS
 		
 		public override int GetItem (int index)
 		{
-			lock (this.WT) {
-				// return this.WT.Access (index);
-				index <<= 2;
-				int u = this.WT.Access (index);
-				u |= this.WT.Access (index + 1) << 8;
-				u |= this.WT.Access (index + 2) << 16;
-				u |= this.WT.Access (index + 3) << 24;
-				return u;
-			}
+			// return this.WT.Access (index);
+			index <<= 2;
+			int u = this.WT.Access (index);
+			u |= this.WT.Access (index + 1) << 8;
+			u |= this.WT.Access (index + 2) << 16;
+			u |= this.WT.Access (index + 3) << 24;
+			return u;
 		}
 		
 		public override void SetItem (int index, int u)

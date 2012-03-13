@@ -282,7 +282,6 @@
     <Compile Include="SimilaritySearch\Indexes\LC_PFixedM.cs" />
     <Compile Include="SimilaritySearch\Indexes\LC_PRNN.cs" />
     <Compile Include="NDesk.Options\Options.cs" />
-    <Compile Include="Util\FixedSizeScheduler.cs" />
     <Compile Include="CompactDS\Bitmaps\DiffSetRL2_64.cs" />
     <Compile Include="CompactDS\Lists\SortedListRS64.cs" />
     <Compile Include="CompactDS\IntCoders\SearchingCodesBinary\BinarySearchCoding64.cs" />

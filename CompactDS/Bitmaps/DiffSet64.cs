@@ -53,7 +53,7 @@ namespace natix.CompactDS
 			this.Samples = new List<long> ();
 			this.Offsets = new List<int> ();
 			this.Stream = new BitStream32 ();
-			this.Coder = new DoublingSearchCoding64 ();
+			this.Coder = new EliasDelta64 ();
 		}
 		
 		public DiffSet64 (short B) : this()
@@ -152,7 +152,7 @@ namespace natix.CompactDS
 			// nothing here
 		}
 		
-		protected virtual void ResetReader ()
+		protected virtual void ResetReader (BitStreamCtxRL ctx)
 		{
 			
 		}
@@ -192,7 +192,7 @@ namespace natix.CompactDS
 			long acc;
 			var ctx = new BitStreamCtxRL ();
 			if (start_index == 0) {
-				this.ResetReader ();
+				this.ResetReader (ctx);
 				acc = -1;
 				ctx.Seek (0);
 			} else {
@@ -245,7 +245,7 @@ namespace natix.CompactDS
 			if (rank < 1) {
 				return -1;
 			}
-			this.ResetReader();
+			this.ResetReader(ctx);
 			int start_index = (rank - 1) / this.B;
 			long acc;
 			int left;
@@ -295,7 +295,7 @@ namespace natix.CompactDS
 				found_pos = -1;
 				return 0;
 			}
-			this.ResetReader ();
+			this.ResetReader (ctx);
 			int start_index = -1;
 			if (this.Samples.Count > 0) {
 				start_index = GenericSearch.FindFirst<long> (pos, this.Samples);
@@ -341,19 +341,17 @@ namespace natix.CompactDS
 			if (current == 0) {
 				prev = AccStart;
 			}
-			lock (this.Stream) {
-				this.WriteNewDiff (current - prev);
-				this.M++;
-				if (this.M % this.B == 0) {
-					this.Commit ();
-					this.Samples.Add (current);
-					this.Offsets.Add ((int)this.Stream.CountBits);
-					//Console.WriteLine ("ADDING SAMPLE M: {0}, current: {1}, prev: {2}, num-samples: {3}",
-					//	this.M, current, prev, this.Samples.Count);
-				}
-				if (current >= this.N) {
-					this.N = current + 1;
-				}
+			this.WriteNewDiff (current - prev);
+			this.M++;
+			if (this.M % this.B == 0) {
+				this.Commit ();
+				this.Samples.Add (current);
+				this.Offsets.Add ((int)this.Stream.CountBits);
+				//Console.WriteLine ("ADDING SAMPLE M: {0}, current: {1}, prev: {2}, num-samples: {3}",
+				//	this.M, current, prev, this.Samples.Count);
+			}
+			if (current >= this.N) {
+				this.N = current + 1;
 			}
 		}
 		
@@ -375,7 +373,7 @@ namespace natix.CompactDS
 			this.B = b;
 			this.M = 0;
 			if (coder == null) {
-				coder = new DoublingSearchCoding64 ();
+				coder = new EliasDelta64 ();
 			}
 			this.Coder = coder;
 			long prev = -1;
@@ -389,6 +387,7 @@ namespace natix.CompactDS
 					throw e;
 				}
 			}
+			this.Commit ();
 		}
 	}
 }

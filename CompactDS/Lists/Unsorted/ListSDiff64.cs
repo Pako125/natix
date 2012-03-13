@@ -51,11 +51,9 @@ namespace natix.CompactDS
 		public override void Add (int u)
 		{
 			this.M++;
-			lock (this.Stream) {
-				Coder.Encode (this.Stream, u);
-				if (this.M % this.BlockSize == 0) {
-					this.Offsets.Add (this.Stream.CountBits);
-				}
+			Coder.Encode (this.Stream, u);
+			if (this.M % this.BlockSize == 0) {
+				this.Offsets.Add (this.Stream.CountBits);
 			}
 		}
 		
