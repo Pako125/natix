@@ -220,17 +220,19 @@ namespace natix.CompactDS
 		public override long Select1 (long rank, UnraveledSymbolXLB unraveled_ctx)
 		{
 			Context ctx = unraveled_ctx.ctx as Context;
-			if (ctx == null || ctx.prev_arg + (this.B * 2) < rank) {
-				if (ctx == null) {
-					var bctx = new BitStreamCtxRL ();
-					unraveled_ctx.ctx = ctx = new Context (rank, bctx);
-				}
+			if (ctx == null) {
+				var bctx = new BitStreamCtxRL ();
+				unraveled_ctx.ctx = ctx = new Context (rank, bctx);
 				ctx.prev_res = this.BackendSelect1 ((int)rank, ctx.ctx);
 			} else {
 				int left = (int)(rank - ctx.prev_arg);
-				for (int i = 0; i < left; i++) {
-					long read = this.ReadNext (ctx.ctx);
-					ctx.prev_res += read;
+				if (left < 0 || left > this.B * 2) {
+					ctx.prev_res = this.BackendSelect1 ((int)rank, ctx.ctx);
+				} else {
+					for (int i = 0; i < left; i++) {
+						long read = this.ReadNext (ctx.ctx);
+						ctx.prev_res += read;
+					}
 				}
 			}
 			ctx.prev_arg = rank;

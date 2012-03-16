@@ -80,11 +80,18 @@ namespace natix.CompactDS
 			}
 		}
 
+		public void Add (int item, int times)
+		{
+			for (int i = 0; i < times; i++) {
+				this.Coder.ArrayAdd (this.Stream, item);
+			}
+		}
+
 		public override void Add (int item)
 		{
 			this.Coder.ArrayAdd (this.Stream, item);
 		}
-		
+
 		public override int GetItem (int index)
 		{
 			return this.Coder.ArrayGet (this.Stream, index);

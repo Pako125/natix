@@ -81,17 +81,17 @@ namespace natix.Sets
 		public virtual IEnumerable<int> Intersection (IList< IList<int> > postings)
 		{
 			int k = postings.Count;
-			Sorting.Sort< IList<int> >(postings, (IList<int> a, IList<int> b) => a.Count - b.Count);
-			List<int> res = new List<int> (1 + (postings[0].Count >> 1));
+			Sorting.Sort< IList<int> > (postings, (IList<int> a, IList<int> b) => a.Count - b.Count);
+			List<int> res = new List<int> (1 + (postings [0].Count >> 1));
 			List<int> tmp = null;
 			List<int> swapAux = null;
-			this.InOrderI(postings[0], 0, postings[0].Count, postings[1], 0, postings[1].Count, res);
+			this.InOrderI (postings [0], 0, postings [0].Count, postings [1], 0, postings [1].Count, res);
 			if (k > 2) {
 				tmp = new List<int> (1 + (res.Count >> 1));
 			}
 			for (int i = 2; i < k; i++) {
-				tmp.Clear();
-				this.InOrderI (res, 0, res.Count, postings[i], 0, postings[i].Count, tmp);
+				tmp.Clear ();
+				this.InOrderI (res, 0, res.Count, postings [i], 0, postings [i].Count, tmp);
 				swapAux = res;
 				res = tmp;
 				tmp = swapAux;
