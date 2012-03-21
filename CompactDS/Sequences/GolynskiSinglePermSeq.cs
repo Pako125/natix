@@ -51,6 +51,17 @@ namespace natix.CompactDS
 			get;
 			set;
 		}
+		
+		public IPermutation GetPERM ()
+		{
+			return this.PERM;
+		}
+
+		public IRankSelect GetLENS ()
+		{
+			return this.LENS;
+		}
+
 #endregion
 		
 		public GolynskiSinglePermSeq ()
