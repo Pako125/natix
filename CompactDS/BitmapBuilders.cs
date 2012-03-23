@@ -76,20 +76,20 @@ namespace natix.CompactDS
 			};
 		}
 		
-		public static BitmapFromList GetDiffSetRL2 (short sample_step)
+		public static BitmapFromList GetDiffSetRL2 (short sample_step, IIEncoder32 coder = null)
 		{
 			return delegate (IList<int> L) {
 				var rs = new DiffSetRL2 ();
-				rs.Build (L, sample_step);
+				rs.Build (L, sample_step, coder);
 				return rs;
 			};
 		}
 		
-		public static BitmapFromList GetDiffSet (short sample_step)
+		public static BitmapFromList GetDiffSet (short sample_step, IIEncoder32 coder = null)
 		{
 			return delegate (IList<int> L) {
 				var rs = new DiffSet ();
-				rs.Build (L, sample_step);
+				rs.Build (L, sample_step, coder);
 				return rs;
 			};
 		}
@@ -160,20 +160,20 @@ namespace natix.CompactDS
 				return rs;
 			};
 		}
-		public static BitmapFromBitStream GetDiffSetRL2_wt (short sample_step)
+		public static BitmapFromBitStream GetDiffSetRL2_wt (short sample_step, IIEncoder32 coder = null)
 		{
 			return delegate (FakeBitmap b) {
 				var rs = new DiffSetRL2 ();
-				rs.Build (CreateSortedList (b), b.Count, sample_step);
+				rs.Build (CreateSortedList (b), b.Count, sample_step, coder);
 				return rs;
 			};
 		}
 		
-		public static BitmapFromBitStream GetDiffSet_wt (short sample_step)
+		public static BitmapFromBitStream GetDiffSet_wt (short sample_step, IIEncoder32 coder = null)
 		{
 			return delegate (FakeBitmap b) {
 				var rs = new DiffSet ();
-				rs.Build (CreateSortedList (b), b.Count, sample_step);
+				rs.Build (CreateSortedList (b), b.Count, sample_step, coder);
 				return rs;
 			};
 		}

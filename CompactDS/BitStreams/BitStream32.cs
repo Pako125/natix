@@ -236,10 +236,8 @@ namespace natix.CompactDS
 		{
 			int offset_r = (int)(ctx.Offset & 31);
 			int offset_q = (int)(ctx.Offset >> 5);
-			//Console.WriteLine ("offset: {0}, offset_q: {1}, offset_r: {2}, numbits: {3}",
-			//	                  		ctx.Offset, offset_q, offset_r, numbits);
-			
-			uint u = this.Buffer [offset_q];
+			uint u;
+			u = this.Buffer [offset_q];
 
 			// cases:
 			// 1) numbits is contained in q-th item
@@ -356,18 +354,11 @@ namespace natix.CompactDS
 				
 		public int ReadZeros (BitStreamCtx ctx)
 		{
-//								int c = 0;
-//								while (!this.Read ()) {
-//									c++;
-//								}
-//								this.Offset--;
-//								return c;
-//			
 			int c = 0;
 			while (ctx.Offset < this.N) {
 				int numbits = (int)Math.Min (32, this.N - ctx.Offset);
-				uint u = (uint)this.Read (numbits, ctx);
-				// Console.WriteLine ("--- u: {0}, numbits: {1}", u, numbits);
+				uint u = 0;
+				u = (uint)this.Read (numbits, ctx);
 				if (u == 0x0) {
 					c += numbits;
 					continue;
@@ -382,14 +373,7 @@ namespace natix.CompactDS
 		
 		public int ReadOnes (BitStreamCtx ctx)
 		{
-//						int c = 0;
-//						while (this.Read ()) {
-//							c++;
-//						}
-//						this.Offset--;
-//						return c;
 			int c = 0;
-			// Console.WriteLine ("xxxxxxxxxx read-ones");
 			while (ctx.Offset < this.N) {
 				int numbits = (int)Math.Min (32, this.N - ctx.Offset);
 				uint u = (uint)this.Read (numbits, ctx);

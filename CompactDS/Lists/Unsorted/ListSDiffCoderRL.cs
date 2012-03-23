@@ -23,8 +23,8 @@ using System.IO;
 namespace natix.CompactDS
 {
 	/// <summary>
-	/// List short integers coder R. Encodes only numbers bigger equal to 1,
-	/// handling specially consequtive sequences of 1's.
+	/// List short integers coder R. Encodes only numbers bigger equal to 1.
+	/// Consecutive sequences of 1's are priorized.
 	/// </summary>
 	public class ListSDiffCoderRL : ListSDiffCoder
 	{	

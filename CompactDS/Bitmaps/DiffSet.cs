@@ -25,21 +25,22 @@ namespace natix.CompactDS
 {
 	public class DiffSet : RankSelectBase
 	{
-		static IIEncoder32 Coder = new EliasGamma();
-		//static IIntegerEncoder Coder = new EliasDelta ();
+		// static IIEncoder32 Coder = new EliasGamma();
 		static int AccStart = -1;
+		IIEncoder32 Coder;
 		public BitStream32 Stream;
 		int N;
 		int M;
 		protected short B = 31;
 		IList<int> Samples;
-		IList<int> Offsets;
+		IList<long> Offsets;
 		
 		public DiffSet ()
 		{
 			this.Samples = new List<int> ();
-			this.Offsets = new List<int> ();
+			this.Offsets = new List<long> ();
 			this.Stream = new BitStream32 ();
+			this.Coder = new EliasDelta ();
 		}
 		
 		public DiffSet (short B) : this()
@@ -66,17 +67,9 @@ namespace natix.CompactDS
 			W.Write (this.M);
 			W.Write (this.B);
 			// Console.WriteLine ("xxxxxx  save samples.count {0}. N: {1}, M: {2}, B: {3}", this.Samples.Count, this.N, this.M, this.B);
-			if (this.Samples.Count > 32) {
-				var sa = new SArray ();
-				sa.Build (this.Samples);
-				sa.Save (W);
-				sa = new SArray ();
-				sa.Build (this.Offsets);
-				sa.Save (W);
-			} else {
-				PrimitiveIO<int>.WriteVector (W, this.Samples);
-				PrimitiveIO<int>.WriteVector (W, this.Offsets);
-			}
+			PrimitiveIO<int>.WriteVector (W, this.Samples);
+			PrimitiveIO<long>.WriteVector (W, this.Offsets);
+			IEncoder32GenericIO.Save (W, this.Coder);
 			this.Stream.Save (W);
 		}
 	
@@ -86,21 +79,13 @@ namespace natix.CompactDS
 			this.M = R.ReadInt32 ();
 			this.B = R.ReadInt16 ();
 			int num_samples = this.M / this.B;
-			if (num_samples > 32) { 
-				var sa = new SArray();
-				sa.Load(R);
-				this.Samples = new SortedListSArray (sa);
-				sa = new SArray ();
-				sa.Load (R);
-				this.Offsets = new SortedListSArray (sa);
-			} else {
-				this.Samples = new int[ num_samples ];
-				this.Offsets = new int[ num_samples ];
-				PrimitiveIO<int>.ReadFromFile (R, num_samples, this.Samples);
-				PrimitiveIO<int>.ReadFromFile (R, num_samples, this.Offsets);
-			}
+			this.Samples = new int[ num_samples ];
+			this.Offsets = new long[ num_samples ];
+			PrimitiveIO<int>.ReadFromFile (R, num_samples, this.Samples);
+			PrimitiveIO<long>.ReadFromFile (R, num_samples, this.Offsets);
 			// Console.WriteLine ("xxxxxx  load samples.count {0}. N: {1}, M: {2}, B: {3}", this.Samples.Count, this.N, this.M, this.B);
-			this.Stream = new BitStream32();
+			this.Coder = IEncoder32GenericIO.Load (R);
+			this.Stream = new BitStream32 ();
 			this.Stream.Load (R);
 		}
 		
@@ -117,7 +102,7 @@ namespace natix.CompactDS
 				throw new ArgumentException ("DiffSet B difference");
 			}
 			Assertions.AssertIList<int> (this.Samples, other.Samples, "DiffSet Samples difference");
-			Assertions.AssertIList<int> (this.Offsets, other.Offsets, "DiffSet Offsets difference");
+			Assertions.AssertIList<long> (this.Offsets, other.Offsets, "DiffSet Offsets difference");
 			this.Stream.AssertEquality (other.Stream);
 		}
 		
@@ -306,7 +291,7 @@ namespace natix.CompactDS
 			if (this.M % this.B == 0) {
 				this.Commit ();
 				this.Samples.Add (current);
-				this.Offsets.Add ((int)this.Stream.CountBits);
+				this.Offsets.Add (this.Stream.CountBits);
 				//Console.WriteLine ("ADDING SAMPLE M: {0}, current: {1}, prev: {2}, num-samples: {3}",
 				//	this.M, current, prev, this.Samples.Count);
 				}
@@ -315,42 +300,32 @@ namespace natix.CompactDS
 			}
 		}
 		
-		public void Build (IList<int> orderedList, short b)
+		public void Build (IList<int> orderedList, short b, IIEncoder32 coder = null)
 		{
 			var n = 0;
 			if (orderedList.Count > 0) {
 				n = orderedList [orderedList.Count - 1];
 			}
-			this.Build (orderedList, n, b);
+			this.Build (orderedList, n, b, coder);
 		}
 		
 		/// <summary>
 		///  build methods
 		/// </summary>
-		public void Build (IEnumerable<int> orderedList, int n, short b)
+		public void Build (IEnumerable<int> orderedList, int n, short b, IIEncoder32 coder = null)
 		{
 			this.N = n;
 			this.B = b;
 			this.M = 0;
+			if (coder == null) {
+				coder = new EliasDelta ();
+			}
+			this.Coder = coder;
 			int prev = -1;
 			foreach (var current in orderedList) {
 				this.Add (current, prev);
 				prev = current;
 			}
-		}
-		
-		public IEnumerable<int> iterate (IBitStream bitstream)
-		{
-			for (int i = 0; i < bitstream.CountBits; i++) {
-				if (bitstream[i]) {
-					yield return i;
-				}
-			}			
-		}
-		
-		public void Build (IBitStream bitstream, short b)
-		{
-			this.Build (iterate (bitstream), (int)bitstream.CountBits, b);
 		}
 	}
 }

@@ -298,6 +298,7 @@
     <Compile Include="CompactDS\IntCoders\BinaryCodes\EliasDelta64.cs" />
     <Compile Include="CompactDS\Bitmaps\DiffSetRL64.cs" />
     <Compile Include="CompactDS\Lists\ShiftedSortedListRS.cs" />
+    <Compile Include="CompactDS\Bitmaps\BitStreamCtxRL.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

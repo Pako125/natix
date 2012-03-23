@@ -40,44 +40,34 @@ namespace natix.CompactDS
 		public void Build (IList<int> seq, int sigma, int t = 16, BitmapFromList64 bitmap_builder = null)
 		{
 			this.sigma = sigma;
-			var L = new long[seq.Count];
 			long n = seq.Count;
-			/*
-			var counters = new int[sigma];
+			var L = new long[n];
+			
+			var counters = new int[sigma + 1];
 			// counters.Add (0, sigma); <- if ListIFS
 			for (int i = 0; i < n; ++i) {
 				var sym = seq [i];
-				counters [sym] += 1;
-				// long s = seq [i];
-				// L.Add (n * s + i);
+				counters [sym + 1] += 1;
 			}
-			for (int i = 1; i < sigma; ++i) {
+			for (int i = 1; i <= sigma; ++i) {
 				counters [i] += counters [i - 1];
 			}
 			for (int i = 0; i < n; ++i) {
 				var sym = seq [i];
 				long long_sym = n * ((long)sym) + i;
-				try {
-					L [counters [sym]] = long_sym;
-					counters [sym] += 1;
-				} catch (Exception e) {
-					Console.WriteLine ("--> sym: {0}, sigma: {1}, counters.Count: {2}, counters[{0}]: {3}", sym, sigma, counters.Length, counters [sym]);
-					throw e;
-				}
+				L [counters [sym]] = long_sym;
+				counters [sym] += 1;
 			}
-			 */
+			counters = null;
+			/**** slow but working ****/
+			/*****
 			for (int i = 0; i < n; ++i) {
 				long s = seq [i];
 				L [i] = n * s + i;
 				//L.Add (n * s + i);
 			}
 			Array.Sort (L);
-			//{	
-			//	L.Sort ();
-			/*int numbits = (int)Math.Ceiling (Math.Log (n * sigma, 2));
-				var fs = new FastSortSubLinear<long,long> (numbits, numbits / 4 + 1, (long u) => u); 
-				fs.Sort (L, null);*/
-			//}
+			*****/
 			if (bitmap_builder == null) {
 				bitmap_builder = BitmapBuilders.GetSArray64 ();
 			}
@@ -126,6 +116,7 @@ namespace natix.CompactDS
 			}
 		}
 		
+		// deprecated
 		public int AccessSequential (int pos)
 		{
 			// DONE: Convert this into a permutation index using the golynski large perm. scheme

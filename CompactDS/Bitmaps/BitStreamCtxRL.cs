@@ -13,42 +13,27 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/CompactDS/BitStreams/BitStreamCtx.cs
+//   Original filename: natix/CompactDS/Bitmaps/BitStreamCtxRL.cs
 // 
 using System;
-using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using natix.SortingSearching;
 
 namespace natix.CompactDS
 {
-	public class BitStreamCtx
+	public class BitStreamCtxRL : BitStreamCtx
 	{
-		public long Offset = 0;
-//		public long Offset {
-//			get {
-//				return this._offset;
-//			}
-//			set {
-//				if (value < 0) {
-//					throw new ArgumentOutOfRangeException (String.Format("XXXX Offset cannot be negative {0} XXXX", value));
-//				}
-//				this._offset = value;
-//			}
-//		}
-		public BitStreamCtx (long offset)
+		public int run_len;
+
+		public BitStreamCtxRL (long offset) : base(offset)
 		{
-			this.Offset = offset;
+			this.run_len = 0;
 		}
 		
-		public BitStreamCtx ()
+		public BitStreamCtxRL () : base(0L)
 		{
-			this.Offset = 0;
-		}
-		
-		public void Seek (long offset)
-		{
-			this.Offset = offset;
 		}
 	}
 }

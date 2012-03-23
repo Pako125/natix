@@ -46,12 +46,12 @@ namespace natix.CompactDS
 		protected int M;
 		protected short B = 31;
 		IList<long> Samples;
-		IList<int> Offsets;
+		IList<long> Offsets;
 		
 		public DiffSet64 ()
 		{
 			this.Samples = new List<long> ();
-			this.Offsets = new List<int> ();
+			this.Offsets = new List<long> ();
 			this.Stream = new BitStream32 ();
 			this.Coder = new EliasDelta64 ();
 		}
@@ -94,7 +94,7 @@ namespace natix.CompactDS
 				}
 			} else {*/
 				PrimitiveIO<long>.WriteVector (Output, this.Samples);
-				PrimitiveIO<int>.WriteVector (Output, this.Offsets);
+				PrimitiveIO<long>.WriteVector (Output, this.Offsets);
 //			}
 			this.Stream.Save (Output);
 		}
@@ -119,9 +119,9 @@ namespace natix.CompactDS
 				}
 			} else {*/
 				this.Samples = new long[ num_samples ];
-				this.Offsets = new int[ num_samples ];
+				this.Offsets = new long[ num_samples ];
 				PrimitiveIO<long>.ReadFromFile (Input, num_samples, this.Samples);
-				PrimitiveIO<int>.ReadFromFile (Input, num_samples, this.Offsets);
+				PrimitiveIO<long>.ReadFromFile (Input, num_samples, this.Offsets);
 //			}
 			this.Stream = new BitStream32 ();
 			this.Stream.Load (Input);
@@ -140,7 +140,7 @@ namespace natix.CompactDS
 				throw new ArgumentException ("DiffSet64 B difference");
 			}
 			Assertions.AssertIList<long> (this.Samples, other.Samples, "DiffSet64 Samples difference");
-			Assertions.AssertIList<int> (this.Offsets, other.Offsets, "DiffSet64 Offsets difference");
+			Assertions.AssertIList<long> (this.Offsets, other.Offsets, "DiffSet64 Offsets difference");
 			this.Stream.AssertEquality (other.Stream);
 		}
 		
@@ -348,7 +348,7 @@ namespace natix.CompactDS
 			if (this.M % this.B == 0) {
 				this.Commit ();
 				this.Samples.Add (current);
-				this.Offsets.Add ((int)this.Stream.CountBits);
+				this.Offsets.Add (this.Stream.CountBits);
 				//Console.WriteLine ("ADDING SAMPLE M: {0}, current: {1}, prev: {2}, num-samples: {3}",
 				//	this.M, current, prev, this.Samples.Count);
 			}
