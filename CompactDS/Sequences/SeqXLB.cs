@@ -59,7 +59,7 @@ namespace natix.CompactDS
 				counters [sym] += 1;
 			}
 			counters = null;
-			/**** slow but working ****/
+			/**** slow construction ****/
 			/*****
 			for (int i = 0; i < n; ++i) {
 				long s = seq [i];

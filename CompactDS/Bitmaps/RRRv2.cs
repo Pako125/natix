@@ -33,7 +33,8 @@ namespace natix.CompactDS
 		
 		override protected void InitClasses ()
 		{
-			this.LI = new ListSDiffCoder( new DoublingSearchCoding(), this.BlockSize);
+			//this.LI = new ListSDiffCoder( new DoublingSearchCoding(), this.BlockSize);
+			this.LI = new ListSDiffCoder( new ZeroCoding(new EliasGamma32(), 1), this.BlockSize);
 			this.Klasses = this.LI;
 		}
 		

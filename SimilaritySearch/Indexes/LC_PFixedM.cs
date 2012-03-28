@@ -44,10 +44,10 @@ namespace natix.SimilaritySearch
 		
 		List<int> build_rest_list;
 		
-		void BuildSearchKNN (T center, IResult res)
+		void BuildSearchKNN (T center, IResult res, object[] null_locks)
 		{
 			var n = this.build_rest_list.Count;
-			int max_t = 16;
+			int max_t = null_locks.Length;
 			Result[] R = new Result[max_t];
 			int[] nullC = new int[max_t];
 			for (int i = 0; i < max_t; ++i) {
@@ -58,7 +58,8 @@ namespace natix.SimilaritySearch
 				var t_id = Thread.CurrentThread.ManagedThreadId % max_t;
 				var oid = this.build_rest_list [i];
 				if (oid < 0) {
-					lock (R[t_id]) {
+					// lock (R[t_id]) {
+					lock (null_locks[t_id]) {
 						++nullC [t_id];
 					}
 					return;
@@ -118,9 +119,14 @@ namespace natix.SimilaritySearch
 		                         IList<float> COV, int M)
 		{
 			int iteration = 0;
-			int numiterations = this.build_rest_list.Count/ M + 1;
+			int numiterations = this.build_rest_list.Count / M + 1;
 			var rand = new Random ();
 			Console.WriteLine ("XXX BEGIN BuildFixedM rest_list.Count: {0}", this.build_rest_list.Count);
+			int max_t = 16;
+			object[] null_locks = new object[max_t];
+			for (int i = 0; i < max_t; ++i) {
+				null_locks [i] = new object ();
+			}
 			while (this.build_rest_list.Count > 0) {
 				int center;
 				int i;
@@ -131,7 +137,7 @@ namespace natix.SimilaritySearch
 				this.build_rest_list [i] = -1;
 				CENTERS.Add (center);
 				IResult res = this.MainSpace.CreateResult (M, false);
-				this.BuildSearchKNN (this.MainSpace [center], res);
+				this.BuildSearchKNN (this.MainSpace [center], res, null_locks);
 				var list = new List<int> ();
 				invindex.Add (list);
 				double covrad = double.MaxValue;
@@ -140,10 +146,9 @@ namespace natix.SimilaritySearch
 					covrad = p.dist;
 				}
 				COV.Add ((float)covrad);
-				if (iteration % 1000 == 0) {
+				if (iteration % 50 == 0) {
 					Console.WriteLine ("docid {0}, iteration {1}/{2}, {3}, date: {4}", center, iteration, numiterations, nick, DateTime.Now);
 				}
-				Console.WriteLine ("docid {0}, iteration {1}/{2}, {3}, date: {4}", center, iteration, numiterations, nick, DateTime.Now);
 				iteration++;
 			}
 			Console.WriteLine ("XXX END BuildFixedM rest_list.Count: {0}, iterations: {1}", this.build_rest_list.Count, iteration);

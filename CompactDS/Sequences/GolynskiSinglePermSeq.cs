@@ -70,46 +70,41 @@ namespace natix.CompactDS
 			this.BitmapBuilder = BitmapBuilders.GetGGMN_wt (16);
 		}
 		
-#region BUILD
-		public void BuildPermInvIndex (IList<int> seq, List<int>[] lists)
-		{
-			var n = seq.Count;
-			for (int i = 0; i < n; i++) {
-				var symbol = seq [i];
-				lists [symbol].Add (i);
-			}
-		}
-
 		public void Build (IList<int> seq, int sigma)
 		{
-			var lens = new BitStream32 ();
-			var lists = new List<int>[sigma];
-			for (int i = 0; i < sigma; i++) {
-				lists [i] = new List<int> ();
+			// A counting sort construction of the permutation
+			var counters = new int[sigma];
+			foreach (var s in seq) {
+				if (s + 1 < sigma) {
+					counters [s + 1]++;
+				}
+			}
+			for (int i = 1; i < sigma; i++) {
+				counters [i] += counters [i - 1];
 			}
 			var n = seq.Count;
-			// TODO replace BuildPermInvIndex per a two passes counting sort like
-			this.BuildPermInvIndex (seq, lists);
-			var numbits = (int)Math.Ceiling (Math.Log (n, 2));
-			var perm = new ListIFS (numbits);
-			for (int i = 0; i < sigma; i++) {
-				foreach (var u in lists[i]) {
-					perm.Add (u);
-				}
-				lens.Write (true);
-				lens.Write (false, lists [i].Count);
-				lists [i] = null;
+			var P = new int[n];
+			for (int i = 0; i < n; i++) {
+				var sym = seq [i];
+				var pos = counters [sym];
+				P [pos] = i;
+				counters [sym] = pos + 1;
 			}
-			// a simple hack to simplify the algorithms
+			// the bitmap to save the lengths
+			var lens = new BitStream32 ();
+			int prevc = 0;
+			foreach (var c in counters) {
+				var len = c - prevc;
+				prevc = c;
+				lens.Write (true);
+				lens.Write (false, len);
+			}
+			// an additional 1 to the end, to simplify source code
 			lens.Write (true);
+
 			var bb_lens = new FakeBitmap (lens);
 			this.LENS = this.BitmapBuilder (bb_lens);
-			this.PERM = this.PermBuilder (perm);
-//			Console.WriteLine ("***** GolynskiSinglePermSeq");
-//			PrintArray ("PERMUTATION-BUILD:", perm);
-//			PrintArray ("PERMUTATION-ENCODED:", this.PERM);
-//			Console.WriteLine (new BitStream32 ((this.LENS as GGMN).GetBitBlocks ()));
-//			PrintArray ("SEQ:", seq);
+			this.PERM = this.PermBuilder (P);
 		}
 		
 		void PrintArray (string msg, IList<int> P)
@@ -121,7 +116,7 @@ namespace natix.CompactDS
 			Console.WriteLine ("<end>");
 
 		}
-#endregion
+
 		public int Access (int pos)
 		{
 			
