@@ -118,7 +118,8 @@ namespace natix.SortingSearching
 		{
 			qsort<KeyType, ValueType> (Keys, Values, startIndex, startIndex + length - 1, cmpfun);
 		}
-
+		
+		static Random rand = new Random();
 		public static void qsort<KeyType, ValueType> (IList<KeyType> Keys, IList<ValueType> Values, int low0, int high0, Comparison<KeyType> cmp)
 		{
 			// adapted from source ./mcs/class/corlib/System/Array.cs, from mono-2.6.4 source
@@ -131,9 +132,9 @@ namespace natix.SortingSearching
 			int high = high0;
 
 			// Be careful with overflows
-			
-			int mid = low + ((high - low) >> 1);
-			KeyType objPivot = Keys[mid];
+			// int mid = low + ((high - low) >> 1);
+			int _mid = rand.Next (low, high + 1);
+			KeyType objPivot = Keys [_mid];
 			
 			while (true) {
 				// Move the walls in

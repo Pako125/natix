@@ -41,7 +41,11 @@ namespace natix.SimilaritySearch
 			get;
 			set;
 		}
-
+		
+		public IRankSelectSeq GetSeq ()
+		{
+			return this.Seq;
+		}
 		/// <summary>
 		/// Constructor
 		/// </summary>
@@ -75,17 +79,27 @@ namespace natix.SimilaritySearch
 		/// </summary>
 		protected abstract int GetDimension();
 
-		public virtual void Build (string indexName, string spaceClass, string spaceName, int sampleSize)
+		public virtual void Build (string indexName, string spaceClass, string spaceName, int sampleSize, Func<int,T> get_item = null)
 		{
 			this.spaceClass = spaceClass;
 			this.spaceName = spaceName;
 			this.LoadSpace ();
 			int dim = this.GetDimension ();
+			this.H = new ushort[sampleSize];
 			Random rand = new Random ();
-			this.H = new UInt16[sampleSize];
-			for (int sIndex = 0; sIndex < sampleSize; sIndex++) {
-				this.H [sIndex] = (ushort)(rand.Next () % dim);
+			{
+				HashSet<int> _coordinates = new HashSet<int> ();
+				int i = 0;
+				while (_coordinates.Count < sampleSize) {
+					var p = (ushort)(rand.Next () % dim);
+					if (_coordinates.Add (p)) {
+						this.H [i] = p;
+						++i;
+					}
+				}
+				Array.Sort (this.H);
 			}
+
 			int len = this.MainSpace.Count;
 			int pc = len / 100 + 1;
 			int numbits = sampleSize > 32 ? 32 : sampleSize;
@@ -95,7 +109,12 @@ namespace natix.SimilaritySearch
 				if (docid % pc == 0) {
 					Console.WriteLine ("Advance: {0:0.00}%, docid: {1}, total: {2}", docid * 100.0 / len, docid, len);
 				}
-				var hash = this.ComputeHash (this.MainSpace [docid]);
+				int hash;
+				if (get_item == null) {
+					hash = this.ComputeHash (this.MainSpace [docid]);
+				} else {
+					hash = this.ComputeHash (get_item (docid));
+				}
 				// Console.WriteLine ("hash: {0}, max: {1}, sample-size: {2}", hash, 1 << sampleSize, sampleSize);
 				seq.Add (hash);
 			}
@@ -119,7 +138,7 @@ namespace natix.SimilaritySearch
 			return this.FilterByRadius (this.KNNSearch (q, 1024), radius);
 		}
 		
-		public override IResult KNNSearch (T q, int K, IResult R)
+		public virtual HashSet<int> GetCandidates (T q)
 		{
 			int hash = this.ComputeHash (q);
 			HashSet<int > Q = new HashSet<int> ();
@@ -127,7 +146,14 @@ namespace natix.SimilaritySearch
 			var len = L.Count1;
 			for (int i = 1; i <= len; i++) {
 				Q.Add (L.Select1 (i));
-			}		
+			}
+			return Q;
+		}
+
+		public override IResult KNNSearch (T q, int K, IResult R)
+		{
+			var Q = this.GetCandidates (q);
+			// K = -1;
 			// Console.WriteLine ("q: {0}, K: {1}, len: {2}", q, K, len);
 			if (K < 0) {
 				foreach (var docId in Q) {

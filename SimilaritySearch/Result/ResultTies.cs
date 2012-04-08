@@ -74,17 +74,17 @@ namespace natix.SimilaritySearch
 			this.InsideUnique = new HashSet<int> ();
 		}
 
-		public void Push (int docid, double dist)
+		public bool Push (int docid, double dist)
 		{
 			double covering = this.CoveringRadius;
 			if (covering < dist) {
-				return;
+				return false;
 			}
 			if (covering == dist && !this.Ceiling) {
-				return;
+				return false;
 			}
 			if (this.InsideUnique != null && this.InsideUnique.Contains (docid)) {
-				return;
+				return false;
 			}
 			List<int> list;
 			if (!this.pool.TryGetValue (dist, out list)) {
@@ -111,6 +111,7 @@ namespace natix.SimilaritySearch
 			if (this.InsideUnique != null) {
 				this.InsideUnique.Add (docid);
 			}
+			return true;
 		}
 		
 		public List<int> GetFirstList (out double dist)

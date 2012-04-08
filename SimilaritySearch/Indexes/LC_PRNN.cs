@@ -49,7 +49,7 @@ namespace natix.SimilaritySearch
 				int nn_center;
 				double nn_dist;
 				this.BuildSearchNN (docid, out nn_center, out nn_dist);
-				lock (invindex) {
+				lock (invindex[nn_center]) {
 					++count;
 					invindex [nn_center].Add (docid);
 					if (this.COV [nn_center] < nn_dist) {

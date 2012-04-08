@@ -245,20 +245,20 @@ namespace natix.SimilaritySearch
 		/// <summary>
 		///  Push a docid and a distance to the result set
 		/// </summary>
-		public void Push (int docid, double d)
+		public bool Push (int docid, double d)
 		{
 			double covering = this.CoveringRadius;
 			if (d == covering) {
 				if (this.ceilingKNN) {
 					this.overflow.Add (new ResultPair (docid, d));
 				}
-				return;
+				return false;
 			}
 			if (d > covering) {
-				return;
+				return false;
 			}
 			if (this.InsideUnique != null && this.InsideUnique.Contains (docid)) {
-				return;
+				return false;
 			}
 			ResultPair r = new ResultPair (docid, d);
 			bool removedLast = false;
@@ -271,7 +271,6 @@ namespace natix.SimilaritySearch
 				if (this.InsideUnique != null) {
 					this.InsideUnique.Remove (last.docid);
 				}
-
 			}
 			this.pairset.Add (r, this.AdaptiveContext);
 			if (this.InsideUnique != null) {
@@ -292,6 +291,7 @@ namespace natix.SimilaritySearch
 					}
 				}
 			}
+			return true;
 		}
 	}
 	

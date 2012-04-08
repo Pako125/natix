@@ -172,6 +172,7 @@ namespace natix.SimilaritySearch
 			string names = null;
 			bool help = false;
 			bool disthist = true;
+			bool force = false;
 			int showmaxres = 30;
 			string indexclass = null;
 			var config = new Dictionary<string, object> ();
@@ -180,21 +181,21 @@ namespace natix.SimilaritySearch
 				{ "i|index=",   v => index = v },
 				{ "q|queries=",  v => queries = v },
 				{ "r|result=", v => result = v },
+				{ "force|f", v => force = true},
 				{ "hidehist", v => disthist = false },
 				{ "names=", v => names = v},
 				{ "showmaxres=", v => showmaxres = int.Parse (v) },
 				{ "indexclass=", v => indexclass = v},
 				{ "h|?|help",   v => help = true },
 				{ "config=", delegate(string v) {
-						var split = v.Split (':');
-						if (split.Length != 2) {
-							throw new ArgumentNullException ("config command options should be in format --config key:value ");
-						}
-						config.Add (split [0], split [1]);
-					}
+				var split = v.Split (':');
+				if (split.Length != 2) {
+					throw new ArgumentNullException ("config command options should be in format --config key:value ");
+				}
+				config.Add (split [0], split [1]);
+			}
 				}
 			};
-			
 			List<string> extraArgs = ops.Parse (args);
 			
 			if (help) {
@@ -202,19 +203,27 @@ namespace natix.SimilaritySearch
 				Console.WriteLine ("{0} search --index indexname --queries queriesfile [--result resname] [index args] [environ args]", Environment.GetCommandLineArgs () [0]);
 				return;
 			}
+			if (result == null) {
+				force = true;
+			}			
 			if ((indexObject == null && index == null) || queries == null) {
 				Console.WriteLine ("Usage: ");
 				Console.WriteLine ("{0} search --index indexname --queries queriesfile [--result resname] [index args] [environ args]", Environment.GetCommandLineArgs () [0]);
 				throw new ArgumentException (String.Format ("Some required arguments wasn't specified index: {0}, queries: {0}", index, queries));
 			}
-			if (indexObject == null) {
-				indexObject = IndexLoader.Load (index, indexclass, config);
+			if (force || !File.Exists (result)) {
+				if (indexObject == null) {
+					indexObject = IndexLoader.Load (index, indexclass, config);
+				} else {
+					index = String.Format ("<memory:{0}>", indexObject.ToString ());
+				}
+				indexObject.Configure (extraArgs);
+				var searchOps = new ShellSearchOptions (queries, index, names, result, showmaxres, disthist, handler);
+				var qstream = new QueryStream (queries);
+				Search (indexObject, qstream.Iterate (), searchOps, extraArgs);
 			} else {
-				index = String.Format ("<memory:{0}>", indexObject.ToString ());
+				Console.WriteLine ("skipping search command since result file already exists. File: {0}", result);
 			}
-			indexObject.Configure (extraArgs);
-			var searchOps = new ShellSearchOptions (queries, index, names, result, showmaxres, disthist, handler);
-			Search (indexObject, new QueryStream (queries), searchOps, extraArgs);
 		}
 		
 		/// <summary>
@@ -245,10 +254,10 @@ namespace natix.SimilaritySearch
 				long tstart = DateTime.Now.Ticks;
 				SearchCost startCost = index.Cost;
 				IResult res;
-				if (qItem.QType < 0) {
-					res = index.ParseKNNSearch (qItem.QRaw, (int)Math.Abs (qItem.QType));
+				if (qItem.QTypeIsRange) {
+					res = index.ParseSearch (qItem.QRaw, qItem.QArg);
 				} else {
-					res = index.ParseSearch (qItem.QRaw, qItem.QType);
+					res = index.ParseKNNSearch (qItem.QRaw, (int)qItem.QArg);
 				}
 				SearchCost finalCost = index.Cost;
 				finalCost.Internal -= startCost.Internal;
@@ -258,7 +267,7 @@ namespace natix.SimilaritySearch
 				long time = DateTime.Now.Ticks - tstart;
 				totaltime += time;
 				if (searchOps.Filter != null) {
-					res = searchOps.Filter (qItem.QRaw, qItem.QType, res, index);
+					res = searchOps.Filter (qItem.QRaw, qItem.QArg, res, index);
 				}
 				SortedDictionary<double, int> hist = new SortedDictionary<double, int> ();
 				if (searchOps.ShowHist) {
@@ -281,7 +290,7 @@ namespace natix.SimilaritySearch
 						Console.WriteLine ("WARNING: Histogram of distances was disabled because there are too many bins");
 					}
 				}
-				ResultInfo info = new ResultInfo (qid, qItem.QType, qItem.QRaw, finalCost, new TimeSpan (time), res);
+				ResultInfo info = new ResultInfo (qid, qItem.EncodeQTypeQArgInSign(), qItem.QRaw, finalCost, new TimeSpan (time), res);
 				if (ResultOutput != null) {
 					// Dirty.SerializeBinary (ResultOutput, info);
 					info.Save (ResultOutput);

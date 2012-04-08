@@ -83,8 +83,9 @@ namespace natix.SimilaritySearch
 				res.Push (u, dist);
 			}
 		}*/
-		public static void BuildSearchKNN (Space<T> sp, ref List<int> rest_list, T center, IResult res)
+		protected virtual void BuildSearchKNN (ref IList<int> rest_list, T center, IResult res)
 		{
+			var sp = this.MainSpace;
 			var n = rest_list.Count;
 			int nullcount = 0;
 			var R = new Result (res.K, res.Ceiling);
@@ -122,9 +123,7 @@ namespace natix.SimilaritySearch
 		/// <summary>
 		/// Builds the LC with fixed bucket size (static version).
 		/// </summary>
-		public static void BuildFixedM (string nick, Space<T> sp, ref List<int> rest_list,
-		                                IList<int> CENTERS, IList<IList<int>> invindex,
-		                                IList<float> COV, int M)
+		protected virtual void BuildFixedM (string nick, ref IList<int> rest_list, IList<IList<int>> invindex, int M)
 		{
 			int iteration = 0;
 			int numiterations = rest_list.Count / M + 1;
@@ -139,8 +138,8 @@ namespace natix.SimilaritySearch
 				} while (center < 0);
 				rest_list [i] = -1;
 				CENTERS.Add (center);
-				IResult res = sp.CreateResult (M, false);
-				BuildSearchKNN (sp, ref rest_list, sp [center], res);
+				IResult res = this.MainSpace.CreateResult (M, false);
+				BuildSearchKNN (ref rest_list, this.MainSpace [center], res);
 				var list = new List<int> ();
 				invindex.Add (list);
 				double covrad = double.MaxValue;
@@ -149,10 +148,9 @@ namespace natix.SimilaritySearch
 					covrad = p.dist;
 				}
 				COV.Add ((float)covrad);
-				if (iteration % 1000 == 0) {
+				if (iteration % 50 == 0) {
 					Console.WriteLine ("docid {0}, iteration {1}/{2}, {3}, date: {4}", center, iteration, numiterations, nick, DateTime.Now);
 				}
-				Console.WriteLine ("docid {0}, iteration {1}/{2}, {3}, date: {4}", center, iteration, numiterations, nick, DateTime.Now);
 				iteration++;
 			}
 			Console.WriteLine ("XXX END BuildFixedM rest_list.Count: {0}, iterations: {1}", rest_list.Count, iteration);
@@ -170,15 +168,15 @@ namespace natix.SimilaritySearch
 			this.spaceName = db_name;
 			this.SetMainSpace ((Space<T>)sp);
 			this.CENTERS = new List<int> (n / M + 1);
-			var rest_list = new List<int> (n);
-			var invindex = new List<IList<int>> (this.CENTERS.Count);
+			IList<int> rest_list = new List<int> (n);
+			IList<IList<int>> invindex = new List<IList<int>> (this.CENTERS.Count);
 			this.COV = new List<float> (this.CENTERS.Count);
 			// Randomization
 			Console.WriteLine ("XXXXX LC_FixedM building {0}, n: {1}", output_name, n);
 			for (int i = 0; i < n; ++i) {
 				rest_list.Add (i);
 			}
-			BuildFixedM (output_name, this.MainSpace, ref rest_list, this.CENTERS, invindex, COV, M);
+			this.BuildFixedM (output_name, ref rest_list, invindex, M);
 			this.SaveLC (output_name, invindex);
 			this.CompileLC (output_name);
 			Dirty.SaveIndexXml (output_name, this);

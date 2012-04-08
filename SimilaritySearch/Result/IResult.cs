@@ -54,9 +54,9 @@ namespace natix.SimilaritySearch
 		void EnsureUniqueItems ();
 		
 		/// <summary>
-		/// Pushes the specified docid and dist to the result
+		/// Pushes the specified docid and dist to the result. Returns true if docid was appended, and false otherwise.
 		/// </summary>
-		void Push(int docid, double dist);
+		bool Push(int docid, double dist);
 		
 		int K {
 			get;

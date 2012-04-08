@@ -47,15 +47,36 @@ namespace natix.SimilaritySearch
 		/// </summary>
 		public override IResult Search (T q, double qrad)
 		{
+			// Console.WriteLine ("XXXXXXX qrad: {0}", qrad);
 			var sp = this.MainSpace;
-			var R = sp.CreateResult (int.MaxValue, false);
 			int len = this.CENTERS.Count;
-
-			Action<int> S = delegate(int center_id) {
+			// int max_t = 16;
+			var L = new List<ResultPair> ();
+			var M = new List<ResultPair> ();
+			/*Result[] partial_res = new Result[max_t];
+			for (int i = 0; i < max_t; ++i) {
+				partial_res [i] = new Result (int.MaxValue, false);
+			}*/
+			Action<int> review_centers = delegate(int center_id) {
 				var dcq = sp.Dist (this.MainSpace [this.CENTERS [center_id]], q);
+				// int uniq_tid = Thread.CurrentThread.ManagedThreadId % max_t;
 				if (dcq <= qrad) {
-					R.Push (this.CENTERS [center_id], dcq);
+					/*lock (partial_res[uniq_tid]) {
+						partial_res [uniq_tid].Push (this.CENTERS [center_id], dcq);
+					}*/
+					lock (L) {
+						L.Add (new ResultPair (this.CENTERS [center_id], dcq));
+					}
 				}
+				if (dcq <= qrad + this.COV [center_id]) {
+					lock (M) {
+						M.Add (new ResultPair (center_id, dcq));
+					}
+				}
+			};
+			Action<ResultPair> review_buckets = delegate(ResultPair center_pair) {
+				var center_id = center_pair.docid;
+				var dcq = center_pair.dist;
 				if (dcq <= qrad + this.COV [center_id]) {
 					var rs = this.SEQ.Unravel (center_id);
 					var count1 = rs.Count1;
@@ -63,8 +84,11 @@ namespace natix.SimilaritySearch
 						var u = rs.Select1 (i);
 						var r = sp.Dist (q, sp [u]);
 						if (r <= qrad) {
-							lock (R) {
-								R.Push (u, r);
+							/*lock (partial_res[uniq_tid]) {
+								partial_res [uniq_tid].Push (u, r);
+							}*/
+							lock (L) {
+								L.Add (new ResultPair (u, r));
 							}
 						}
 					}
@@ -72,110 +96,113 @@ namespace natix.SimilaritySearch
 			};
 			var pops = new ParallelOptions ();
 			pops.MaxDegreeOfParallelism = -1;
-			Parallel.For (0, len, pops, S);
+			Parallel.For (0, len, pops, review_centers);
+			/*
+			Action<int> review_items = delegate (int u) {
+				// var u = rs.Select1 (i);
+				var r = sp.Dist (q, sp [u]);
+				if (r <= qrad) {
+					lock (L) {
+						L.Add (new ResultPair (u, r));
+					}
+				}
+			};
+			foreach (var center_pair in M) {
+				var center_id = center_pair.docid;
+				var dcq = center_pair.dist;
+				if (dcq <= qrad + this.COV [center_id]) {
+					var list = new SortedListRS (this.SEQ.Unravel (center_id));
+					Parallel.ForEach<int> (list, pops, review_items);
+				}
+			}*/
+			Parallel.ForEach<ResultPair> (M, pops, review_buckets);
+			/*var R = partial_res [0];
+			for (int i = 1; i < max_t; ++i) {
+				foreach (var p in partial_res[i]) {
+					R.Push (p.docid, p.dist);
+				}
+			}
+			return R;*/
+			var R = new Result (int.MaxValue, false);
+			foreach (var pair in L) {
+				R.Push (pair.docid, pair.dist);
+			}
 			return R;
 		}
 		
 		/// <summary>
 		/// KNN search.
 		/// </summary>
-		public override IResult KNNSearch (T q, int K, IResult R)
+		public override IResult KNNSearch (T q, int K, IResult res)
 		{
 			var sp = this.MainSpace;
 			int len = this.CENTERS.Count;
-			int t_max = 16;
-			var C = new IResult[t_max];
-			for (int i = 0; i < t_max; ++i) {
-				C [i] = this.MainSpace.CreateResult (len, false);
-			}
+			// int t_max = 16;
+			//var center_res = new IResult[t_max];
+			// var partial_res = new IResult[t_max];
+			var current_res = res;
+			int [] centers_list = new int[ len ];
+			double [] dists_list = new double[ len ];
+			/*for (int i = 0; i < t_max; ++i) {
+				center_res [i] = this.MainSpace.CreateResult (len, false);
+				// partial_res [i] = this.MainSpace.CreateResult (K, res.Ceiling);
+			}*/
+			// center's selection
 			Action<int> S = delegate(int center) {
-				var t_id = Thread.CurrentThread.ManagedThreadId % t_max;
+				// var t_id = Thread.CurrentThread.ManagedThreadId % t_max;
 				var dcq = sp.Dist (this.MainSpace [this.CENTERS [center]], q);
-				lock (R) {
-					R.Push (this.CENTERS [center], dcq);
-				}
-				//var rm = Math.Abs (dcq - this.COV [center]);
-				if (dcq <= R.CoveringRadius + this.COV [center]) {
-					// if (rm <= R.CoveringRadius) {
-					lock (C[t_id]) {
-						C [t_id].Push (center, dcq);
+				/*lock (center_res[t_id]) {					
+					center_res [t_id].Push (center, dcq);
+				}*/
+				centers_list [center] = center;
+				dists_list [center] = dcq;
+				//var current_res = partial_res [t_id];
+				/*if (dcq <= current_res.CoveringRadius + this.COV [center]) {
+					lock (current_res) {
+						current_res.Push (this.CENTERS [center], dcq);
 					}
-					// C.Push (center, rm);
-				}
+				}*/
 			};
 			var pops = new ParallelOptions ();
 			pops.MaxDegreeOfParallelism = -1;
 			Parallel.For (0, len, pops, S);
-			//foreach (ResultPair pair in C) {
-			Action<ResultPair> Scenters = delegate(ResultPair pair) {
-				var dcq = pair.dist;
-				var center = pair.docid;
-				if (dcq <= R.CoveringRadius + this.COV [center]) {
+			Array.Sort<double, int> (dists_list, centers_list);
+			for (int i = 0; i < K; ++i) {
+				current_res.Push (centers_list[i], dists_list[i]);
+			}
+			// parallel review of centers
+			Action<int> review_centers = delegate(int center_index) {
+				// int t_id = Thread.CurrentThread.ManagedThreadId % t_max;
+				var dcq = dists_list [center_index];
+				int center = centers_list [center_index];
+				//var current_res = partial_res [t_id];
+				var cov = this.COV [center];
+				if (dcq <= current_res.CoveringRadius + cov) {
 					var rs = this.SEQ.Unravel (center);
 					var count1 = rs.Count1;
 					for (int i = 1; i <= count1; i++) {
 						var u = rs.Select1 (i);
 						var r = sp.Dist (q, sp [u]);
-						//if (r <= qr) { // already handled by R.Push
-						lock (R) {
-							R.Push (u, r);
+						//if (r <= qr) // already handled by R.Push
+						lock (current_res) {
+							current_res.Push (u, r);
 						}
 					}
 				}
 			};
 			pops = new ParallelOptions ();
 			pops.MaxDegreeOfParallelism = -1;
-			foreach (var _C in C) {
-				Parallel.ForEach<ResultPair> (_C, pops, Scenters);
-			}
-			return R;
+			//Parallel.For (0, len, pops, review_centers);
+			Parallel.For (0, len, pops, review_centers);
+			/* foreach (var C in center_res) {	
+				Parallel.ForEach<ResultPair> (C, pops, review_centers);
+			}*/
+			/*foreach (var R in partial_res) {
+				foreach (var p in R) {
+					res.Push (p.docid, p.dist);
+				}
+			}*/
+			return res;
 		}
-		
-//		// methods for partial searching (poly metric-index)
-//		/// <summary>
-//		/// Partial KNN search
-//		/// </summary>
-//		public IEnumerable<IList<int>> PartialKNNSearch (T q, int K, IResult R)
-//		{
-//			var sp = this.MainSpace;
-//			int len = this.CENTERS.Count;
-//			var C = this.MainSpace.CreateResult (len, false);
-//			for (int center = 0; center < len; center++) {
-//				var dcq = sp.Dist (this.MainSpace [this.CENTERS [center]], q);
-//				R.Push (this.CENTERS [center], dcq);
-//				if (dcq <= R.CoveringRadius + this.COV [center]) {
-//					C.Push (center, dcq);
-//				}
-//			}
-//			foreach (ResultPair pair in C) {
-//				var dcq = pair.dist;
-//				var center = pair.docid;
-//				if (dcq <= R.CoveringRadius + this.COV [center]) {
-//					yield return new SortedListRS(this.SEQ.Unravel(center));
-//				}
-//			}
-//		}
-//		
-//		/// <summary>
-//		/// Partial radius search
-//		/// </summary>
-//
-//		public IList<IList<int>> PartialSearch (T q, double qrad, IResult R)
-//		{
-//			var sp = this.MainSpace;
-//			int len = this.CENTERS.Count;
-//			IList<IList<int>> output_list = new List<IList<int>> ();
-//			for (int center_id = 0; center_id < len; center_id++) {
-//				var dcq = sp.Dist (this.MainSpace [this.CENTERS [center_id]], q);
-//				if (dcq <= qrad) {
-//					R.Push (this.CENTERS [center_id], dcq);
-//				}
-//				if (dcq <= qrad + this.COV [center_id]) {
-//					// output_list.Add (this.invindex [center_id]);
-//					output_list.Add (new SortedListRS (this.SEQ.Unravel(center_id)));
-//				}
-//			}
-//			return output_list;
-//		}
 	}
 }

@@ -259,7 +259,14 @@ namespace natix.SimilaritySearch
 
 		public double Recall (ResultInfo basis, int basisSize, int resultSize)
 		{
-			double r = this.IntersectCardinality (basis, basisSize, resultSize) * 1.0 / basisSize;
+			if (resultSize == 0) {
+				return 0;
+			}
+			var intersection = this.IntersectCardinality (basis, basisSize, resultSize);
+			if (intersection == 0) {
+				return 0;
+			}
+			double r = intersection * 1.0 / basisSize;
 			if (r > 1) {
 				throw new ArgumentException (String.Format ("recall: {0}, basis: {1}, result: {2}", r, basisSize, resultSize));
 			}

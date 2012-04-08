@@ -299,6 +299,7 @@
     <Compile Include="CompactDS\Bitmaps\DiffSetRL64.cs" />
     <Compile Include="CompactDS\Lists\ShiftedSortedListRS.cs" />
     <Compile Include="CompactDS\Bitmaps\BitStreamCtxRL.cs" />
+    <Compile Include="SimilaritySearch\Indexes\MLSC.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -81,6 +81,7 @@ namespace natix.SimilaritySearch
 			{"binperms2bit", () => typeof(BinPermsTwoBit<>)},
 			{"lshhamming", () => typeof(HammingLSH)},
 			{"lschamming", () => typeof(HammingLSC)},
+			{"mlschamming", () => typeof(HammingMLSC)},
 			{"pivinvindex", () => typeof(PivInvIndex<>) },
 			{"lcirnn", () => typeof(LC_IRNN<>)},
 			{"lcprnn", () => typeof(LC_PRNN<>)},

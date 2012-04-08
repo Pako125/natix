@@ -438,7 +438,7 @@ namespace natix.SimilaritySearch
 			}
 		}
 		
-		public IEnumerable<IList<int>> PartialKNNSearch (T q, int K, IResult R, IDictionary<int,double> cache)
+		public virtual IEnumerable<IList<int>> PartialKNNSearch (T q, int K, IResult R, IDictionary<int,double> cache)
 		{
 			//if (cache_space == null) {
 			//	cache_space = this.MainSpace;
@@ -478,7 +478,7 @@ namespace natix.SimilaritySearch
 		/// Partial radius search
 		/// </summary>
 
-		public IList<IList<int>> PartialSearch (T q, double qrad, IResult R, IDictionary<int,double> cache)
+		public virtual IList<IList<int>> PartialSearch (T q, double qrad, IResult R, IDictionary<int,double> cache)
 		{
 			//if (cache_space == null) {
 			//	cache_space = this.MainSpace;

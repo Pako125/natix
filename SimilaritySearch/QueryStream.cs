@@ -35,114 +35,81 @@ namespace natix.SimilaritySearch
 	public struct CommandQuery
 	{
 		/// <summary>
-		/// Query type. QType &gt; 0: radius (double), QType &lt; 0: abs(KNN) (int)
+		/// Query Type
 		/// </summary>
-		public double QType;
+		public bool QTypeIsRange;
+		/// <summary>
+		/// Query Argument 
+		/// </summary>
+		public double  QArg;
 		/// <summary>
 		/// Query object in string representation
 		/// </summary>
-		public string QRaw;
-
+		public string QRaw;		
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public CommandQuery (string qraw, double qtype)
+
+		public CommandQuery (string qraw, double qarg, bool qtypeisrange)
 		{
-			this.QType = qtype;
 			this.QRaw = qraw;
+			this.QArg = qarg;
+			this.QTypeIsRange = qtypeisrange;
 		}	
+		
+		public double EncodeQTypeQArgInSign ()
+		{
+			if (this.QTypeIsRange) {
+				return Math.Abs (this.QArg);
+			} else {
+				if (this.QArg > 0) {
+					return -this.QArg;
+				} else {
+					return this.QArg;
+				}
+			}
+		}
 	}
 	
 	/// <summary>
 	/// Query Reader
 	/// </summary>
-	public class QueryStream : IEnumerable<CommandQuery>, IEnumerator<CommandQuery>
+	public class QueryStream
 	{
-		string qname;
-		StreamReader qfile;
-		CommandQuery current;
-		bool closeinput = false;
-		static char[] sep = new char[] {','};
-		
+		static char[] sep1 = new char[] {','};
+		static char[] sep2 = new char[] {' '};
+		string[] commands;
 		/// <summary>
 		/// Constructor from file (use "-" to read from standard input)
 		/// </summary>
 		public QueryStream (string qname)
 		{
-			this.qname = qname;
-			((IEnumerator)this).Reset ();
-		}
-			
-		/// <summary>
-		/// Destructor
-		/// </summary>
-		~QueryStream ()
-		{
-			if (closeinput) {
-				qfile.Close ();
-				closeinput = false;
-			}
-		}
-		
-		IEnumerator<CommandQuery> IEnumerable<CommandQuery>.GetEnumerator ()
-		{
-			return this;
-		}
-		
-		IEnumerator IEnumerable.GetEnumerator ()
-		{
-			return this;
-		}
-		
-		CommandQuery IEnumerator<CommandQuery>.Current {
-			get {
-				return this.current;
-			}
-		}
-		object IEnumerator.Current {
-			get { return this.current; }
+			this.commands = File.ReadAllLines (qname);
 		}
 
-		void IEnumerator.Reset ()
+		public IEnumerable<CommandQuery> Iterate ()
 		{
-			if (this.closeinput) {
-				this.qfile.Close ();
-			}
-			if (qname == "-") {
-				qfile = (StreamReader)Console.In;
-				closeinput = false;
-			} else {
-				qfile = new StreamReader (new MemoryStream (File.ReadAllBytes (qname)));
-				closeinput = true;
-			}
-		}
-		
-		bool IEnumerator.MoveNext ()
-		{
-			if (this.qfile == null || this.qfile.EndOfStream) {
-				return false;
-			} else {
-				string line = this.qfile.ReadLine ().Trim ();
+			foreach (var line in commands) {
 				if (line == "-0") {
-					this.qfile.Close ();
-					this.qfile = null;
-					this.closeinput = false;
-					return false;
+					break;
 				}
-				string[] s = line.Split (sep, 2);
-				this.current = new CommandQuery (s[1], double.Parse(s[0]));
-				return true;
-			}
-		}
-		
-		void IDisposable.Dispose ()
-		{
-			if (this.closeinput) {
-				this.qfile.Close ();
-				this.closeinput = false;
+				string[] s = line.Split (sep1, 2);
+				CommandQuery cmd;
+				if (s [0].StartsWith ("search")) {
+					var m = s [0].Split (sep2);
+					if (m.Length != 3) {
+						throw new ArgumentOutOfRangeException ("search cmd must be 'search {knn|range}' arg");
+					}
+					var qtype = m [1];
+					var qarg = double.Parse(m [2]);
+					var qraw = s [1];
+					cmd = new CommandQuery (qraw, qarg, qtype.CompareTo ("range") == 0);
+				} else {
+					var qarg = double.Parse (s [0]);
+					cmd = new CommandQuery (s [1], Math.Abs (qarg), qarg >= 0);
+				}
+				yield return cmd;
 			}
 		}
 	}
-	
-
 }

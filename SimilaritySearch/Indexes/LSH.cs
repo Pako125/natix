@@ -40,7 +40,7 @@ namespace natix.SimilaritySearch
 		/// <summary>
 		/// Matrix. One vector per LSH function 
 		/// </summary>
-		protected UInt16[] SamplingIndexes;
+		protected UInt16[] H;
 	
 		/// <summary>
 		/// Buckets / Hash tables to save doc references
@@ -70,7 +70,7 @@ namespace natix.SimilaritySearch
 			this.LoadSpace ();
 			// this.space = (Space<byte[]>)SpaceCache.Load (this.spaceClass, this.spaceName);
 			// TODO: Save and load without recompute LSH, right now we always compute the hashes
-			this.SamplingIndexes = (ushort[])Dirty.DeserializeBinary (indexName + ".samples.bin");
+			this.H = (ushort[])Dirty.DeserializeBinary (indexName + ".samples.bin");
 			//for (int docid = 0; docid < this.MainSpace.Count; docid++) {
 			//	this.Insert (docid);
 			//}
@@ -103,46 +103,58 @@ namespace natix.SimilaritySearch
 			this.LoadSpace ();
 			int dim = this.GetDimension ();
 			Random rand = new Random ();
-			this.SamplingIndexes = new UInt16[sampleSize];
-			for (int sIndex = 0; sIndex < sampleSize; sIndex++) {
-				this.SamplingIndexes[sIndex] = (ushort)(rand.Next () % dim);
+			this.H = new UInt16[sampleSize];
+			if (dim < sampleSize) {
+				throw new ArgumentOutOfRangeException ("dimension < H_sampleSize");
+			}
+			{
+				HashSet<int> _coordinates = new HashSet<int> ();
+				int i = 0;
+				while (_coordinates.Count < sampleSize) {
+					var p = (ushort)(rand.Next () % dim);
+					if (_coordinates.Add (p)) {
+						this.H [i] = p;
+						++i;
+					}
+				}
+				Array.Sort (this.H);
 			}
 			int Slen = this.MainSpace.Count;
 			int pc = Slen / 100 + 1;
-			var IIdx = new Dictionary<int, IList<int> >();
+			var IIdx = new Dictionary<int, IList<int> > ();
 			for (int docid = 0; docid < Slen; docid++) {
 				if (docid % pc == 0) {
-					Console.WriteLine("Advance: {0:0.00}%, docid: {1}, total: {2}", docid * 100.0 / Slen, docid, Slen);
+					Console.WriteLine ("Advance: {0:0.00}%, docid: {1}, total: {2}", docid * 100.0 / Slen, docid, Slen);
 				}
 				// Console.WriteLine(docid);
 				this.Insert (docid, IIdx);
 			}
 			
 			Dirty.SaveIndexXml (indexName, this);
-			Dirty.SerializeBinary (indexName + ".samples.bin", this.SamplingIndexes);
+			Dirty.SerializeBinary (indexName + ".samples.bin", this.H);
 			
 			// saves the sizes of each inverted list
 			// var L = new ListIntegersDiffSet ();
 			// the vocabulary (1 if key is set, 0 if not)
 			// var V = new SortedListDiffSet();
-			var Keys = new List<int>(IIdx.Keys);
-			Keys.Sort();
-			var name = String.Format("{0}.lsh.invindex", indexName);
+			var Keys = new List<int> (IIdx.Keys);
+			Keys.Sort ();
+			var name = String.Format ("{0}.lsh.invindex", indexName);
 			using (var OutputSortedLists = new BinaryWriter(File.Create(name))) {
-				OutputSortedLists.Write((int) Keys.Count);
+				OutputSortedLists.Write ((int)Keys.Count);
 				foreach (var key in Keys) {
-					var sa = new SArray();
-					sa.Build(IIdx[key]);
-					sa.Save(OutputSortedLists);
+					var sa = new SArray ();
+					sa.Build (IIdx [key]);
+					sa.Save (OutputSortedLists);
 					// L.Add(II[key].Count);
 					// V.Add(key);						
 				}
 			}
-			name = String.Format("{0}.lsh", indexName);
+			name = String.Format ("{0}.lsh", indexName);
 			using (var Output = new BinaryWriter(File.Create(name))) {
 				// L.Save(Output);
 				// V.Save(Output);
-				var sa = new SArray();
+				var sa = new SArray ();
 				sa.Build (Keys);
 				sa.Save (Output);
 			}
@@ -263,7 +275,7 @@ namespace natix.SimilaritySearch
 		public override int ComputeHash (IList<byte> u, out int sizehash)
 		{
 			int hash = 0;
-			var H = this.SamplingIndexes;
+			var H = this.H;
 			for (int j = 0; j < H.Length; j++) {
 				// j: position to sample
 				// k: sample

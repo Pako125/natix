@@ -110,6 +110,11 @@ namespace natix.CompactDS
 			return gen;
 		}
 		
+		public IPermutation GetPERM ()
+		{
+			return this.perm;
+		}
+		
 		public int Sigma {
 			get {
 				return this.sigma;
