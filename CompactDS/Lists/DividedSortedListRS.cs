@@ -13,42 +13,42 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/Sets/UnionIntersection/FastUIArray8.cs
+//   Original filename: natix/CompactDS/Lists/DividedSortedListRS.cs
 // 
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using natix.CompactDS;
+using System.IO;
 
-namespace natix.Sets
+namespace natix.CompactDS
 {
-	public class FastUIArray8 : IUnionIntersection
+	public class DividedSortedListRS : ListGenerator<int>
 	{
-		int N;
-		public FastUIArray8 (int N)
+		public IRankSelect B;
+		public int divisor;
+		
+		public DividedSortedListRS (IRankSelect rsbitmap, int div)
 		{
-			this.N = N;
+			this.B = rsbitmap;
+			this.divisor = div;
 		}
 		
-		public IList<int> ComputeUI (IList<IList<IRankSelect>> sets)
-		{
-			byte[] A = new byte[this.N];
-			var lambda = sets.Count;
-			var L = new List<int> ();
-			foreach (var list in sets) {
-				foreach (var rs in list) {
-					// foreach (var item in alist) {
-					var count1 = rs.Count1;
-					for (int i = 1; i <= count1; ++i) {
-						var item = rs.Select1 (i);
-						A [item]++;
-						if (A [item] == lambda) {
-							L.Add (item);
-						}
-					}
-				}
+		public override int Count {
+			get {
+				// return this.B.Rank1 (this.B.Count - 1);
+				return this.B.Count1 ;
 			}
-			return L;
 		}
+		
+		public override int GetItem (int index)
+		{
+			return this.B.Select1 (index + 1) / this.divisor;
+		}
+		
+		public override void SetItem (int index, int u)
+		{
+			throw new NotSupportedException ();
+		}
+		
 	}
 }
-

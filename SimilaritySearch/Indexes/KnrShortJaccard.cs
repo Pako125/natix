@@ -48,7 +48,7 @@ namespace natix.SimilaritySearch
 		/// Wrap the knr sequence
 		/// </summary>
 		/// <param name="a">
-		protected override IList<UInt16> KnrWrap (IList<UInt16> a)
+		public override IList<UInt16> KnrWrap (IList<UInt16> a)
 		{
 			return a;
 		}

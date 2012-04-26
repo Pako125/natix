@@ -39,7 +39,7 @@ namespace natix.SimilaritySearch
 		/// <summary>
 		/// Wrap to sorted ppindex
 		/// </summary>
-		protected override IList<UInt16> KnrWrap (IList<UInt16> a)
+		public override IList<UInt16> KnrWrap (IList<UInt16> a)
 		{
 			Sorting.Sort<UInt16> (a);
 			return a;
@@ -66,7 +66,7 @@ namespace natix.SimilaritySearch
 		/// <returns>
 		/// A <see cref="UInt16[]"/>
 		/// </returns>
-		protected override IList<UInt16> KnrWrap (IList<UInt16> a)
+		public override IList<UInt16> KnrWrap (IList<UInt16> a)
 		{
 			Sorting.Sort<UInt16> (a);
 			return a;

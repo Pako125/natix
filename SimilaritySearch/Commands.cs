@@ -212,6 +212,7 @@ namespace natix.SimilaritySearch
 				throw new ArgumentException (String.Format ("Some required arguments wasn't specified index: {0}, queries: {0}", index, queries));
 			}
 			if (force || !File.Exists (result)) {
+				Console.WriteLine ("XXXXXXXXXX index: {0}, indexclass: {1}", index, indexclass);
 				if (indexObject == null) {
 					indexObject = IndexLoader.Load (index, indexclass, config);
 				} else {

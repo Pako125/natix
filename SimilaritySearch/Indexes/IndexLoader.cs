@@ -56,6 +56,11 @@ namespace natix.SimilaritySearch
 			{"bkt", () => typeof(Bkt<>)},
 			{"sequential", () => typeof(Sequential<>)},
 			// {"knrinvindex", () => typeof(KnrInvIndex<>)},
+			{"knrseqsearch", () => typeof(KnrSeqSearch<>)},
+			{"knrseqsearchjaccard", () => typeof(KnrSeqSearchJaccard<>)},
+			{"knrseqsearchfootrule", () => typeof(KnrSeqSearchFootrule<>)},
+			{"knrseqsearchspearmanrho", () => typeof(KnrSeqSearchSpearmanRho<>)},
+			{"knrseqsearchrelmatches", () => typeof(KnrSeqSearchRelMatches<>)},
 			{"knrinvindexjaccard", () => typeof(KnrInvIndexJaccard<>)},
 			{"knrjaccard", () => typeof(KnrJaccard<>)},
 			{"knrdice", () => typeof(KnrDice<>)},
@@ -93,6 +98,7 @@ namespace natix.SimilaritySearch
 			{"lcfixedm", () => typeof(LC_FixedM<>)},
 			{"lcparallelsearch", () => typeof(LC_ParallelSearch<>)},
 			{"polyindexlc", () => typeof(PolyIndexLC<>)},
+			{"polyindexlcapprox", () => typeof(PolyIndexLC_Approx<>)},
 			// {"permpolyindexlc", () => typeof(PermPolyIndexLC<>)}, // comment out after review the algorithm
 		};
 		
@@ -118,21 +124,11 @@ namespace natix.SimilaritySearch
 			}
 			Type indexType = null;
 			try {
-				indexType = IndexFactory[indexclass.ToLower ()] ();
+				indexType = IndexFactory [indexclass.ToLower ()] ();
 			} catch (KeyNotFoundException e) {
 				StackTrace st = new StackTrace (true);
-				for (int i = 0; i < st.FrameCount; i++)
-				{
-					// Note that high up the call stack, there is only
-					// one stack frame.
-					StackFrame sf = st.GetFrame (i);
-					Console.WriteLine ();
-					Console.WriteLine ("High up the call stack, Method: {0}",
-                    sf.GetMethod ());
-					
-					Console.WriteLine ("High up the call stack, Line Number: {0}",
-						sf.GetFileLineNumber ());
-				}
+				Console.WriteLine (e.ToString ());
+				Console.WriteLine (st.ToString ());
 				Console.WriteLine ("Unknown index class: '{0}' (space: '{1}'), candidates:", indexclass, spaceclass);
 				foreach (string s in IndexLoader.IndexFactory.Keys) {
 					Console.WriteLine ("Index class: {0}", s);
@@ -152,8 +148,8 @@ namespace natix.SimilaritySearch
 		public static Index Load (string name, string indexClass, string spaceClass, IDictionary<string, object> config)
 		{
 			Type indexType;
-			Console.WriteLine ("Loading index: {0}", name);
-			Console.WriteLine ("Loading indexClass: {0}", indexClass);
+			Console.WriteLine ("*** Loading index: {0}", name);
+			Console.WriteLine ("*** Loading index-class: {0}", indexClass);
 			indexType = Type.GetType (indexClass);
 			if (indexType == null) {
 				indexType = Create (indexClass, spaceClass, null).GetType ();

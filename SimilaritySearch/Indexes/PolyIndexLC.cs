@@ -21,6 +21,7 @@ using System.Collections;
 using System.Collections.Generic;
 using NDesk.Options;
 using natix.Sets;
+using natix.CompactDS;
 
 namespace natix.SimilaritySearch
 {
@@ -90,7 +91,7 @@ namespace natix.SimilaritySearch
 
 		public override IResult Search (T q, double radius)
 		{
-			IList<IList<IList<int>>> M = new List<IList<IList<int>>> ();
+			IList<IList<IRankSelect>> M = new List<IList<IRankSelect>> ();
 			IResult R = this.MainSpace.CreateResult (this.MainSpace.Count, false);
 			R.EnsureUniqueItems ();
 			var cache = new Dictionary<int,double> ();
@@ -112,7 +113,7 @@ namespace natix.SimilaritySearch
 		{
 			R.EnsureUniqueItems ();
 			byte[] A = new byte[ this.MainSpace.Count ];
-			var queue = new Queue<IEnumerator<IList<int>>> ();
+			var queue = new Queue<IEnumerator<IRankSelect>> ();
 			var cache = new Dictionary<int,double> ();
 			foreach (var I in this.lc_list) {
 				var L = I.PartialKNNSearch (q, K, R, cache).GetEnumerator ();
@@ -123,7 +124,11 @@ namespace natix.SimilaritySearch
 			int max = queue.Count;
 			while (queue.Count > 0) {
 				var L = queue.Dequeue ();
-				foreach (var item in L.Current) {
+				// foreach (var item in L.Current) {
+				var rs = L.Current;
+				var count1 = rs.Count1;
+				for (int i = 1; i <= count1; ++i) {
+					var item = rs.Select1 (i);
 					A [item]++;
 					if (A [item] == max) {
 						var dist = this.MainSpace.Dist (q, this.MainSpace [item]);

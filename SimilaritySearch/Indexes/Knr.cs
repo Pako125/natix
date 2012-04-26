@@ -21,6 +21,7 @@ using System.Collections;
 using System.Collections.Generic;
 using NDesk.Options;
 using natix.SortingSearching;
+using System.Threading.Tasks;
 
 namespace natix.SimilaritySearch
 {
@@ -53,12 +54,12 @@ namespace natix.SimilaritySearch
 		/// <summary>
 		/// Accesor to the internal sequences
 		/// </summary>
-		public IList<IList<UInt16>> GetListOfKnrSeq ()
+		public virtual IList<IList<UInt16>> GetListOfKnrSeq ()
 		{
 			return this.SeqSpace.seqs;
 		}
 
-		public void LoadListOfKnrSeq (string name)
+		public virtual void LoadListOfKnrSeq (string name)
 		{
 			if (this.SeqSpace == null) {
 				this.SeqSpace = (SequenceSpace<UInt16>)SpaceCache.Load ("sequence-uint16", name + ".seqspace", null, false);
@@ -165,7 +166,7 @@ namespace natix.SimilaritySearch
 		/// Function to retrieve the knr representation of the database,
 		/// prototype Func(System.Int32, IList<UInt16>), null to compute the knr
 		/// </param>
-		public virtual void Build (string name, string spaceClass, string spaceName, string indexpermsname, int maxcand, int knrbound, Func<int, IList<UInt16> > _GetKnr)
+		public virtual void Build (string name, string spaceClass, string spaceName, string indexpermsname, int maxcand, int knrbound, Func<int, IList<UInt16> > _GetKnr, bool parallel_build)
 		{
 			this.LoadSpaceAndRefs (name, spaceClass, spaceName, indexpermsname, true);
 			this.Maxcand = maxcand;
@@ -174,22 +175,62 @@ namespace natix.SimilaritySearch
 			var sname = name + ".seqspace";
 			var head = String.Format ("--sequences {0}.seqs --size {1} --distance None --usedisk False", sname, this.MainSpace.Count);
 			File.WriteAllText (sname, head);
-			var w = new StreamWriter (File.Create (sname + ".seqs", 1 << 20));
-			Int32 sL = this.MainSpace.Count;
-			int pc = sL / 500 + 1;
-			for (int docid = 0; docid < sL; docid++) {
-				foreach (var u in _GetKnr(docid)) {
-					w.Write ("{0} ", u);
+			using (var w = new StreamWriter (File.Create (sname + ".seqs"))) {
+				IList<UInt16>[] seqs;
+				Console.WriteLine ("Starting construction of {0}, parallel: {1}", name, parallel_build);
+				if (parallel_build) {
+					seqs = this.ParallelBuild (_GetKnr, indexpermsname);
+				} else {
+					seqs = this.SequentialBuild (_GetKnr, indexpermsname);
 				}
-				w.WriteLine ();
-				if ((docid % pc) == 0) {
-					Console.WriteLine ("Knr index docid {0} of {1} ({2}), advance {3:0.00}%", docid, sL, indexpermsname, docid * 100.0 / sL);
+				foreach (var seq in seqs) {
+					for (int i = 0; i < seq.Count; ++i) {
+						if (i + 1 == seq.Count) {
+							w.Write ("{0}", seq [i]);
+						} else {
+							w.Write ("{0} ", seq [i]);
+						}
+					}
+					w.WriteLine ();
 				}
 			}
-			w.Close ();
 			Dirty.SaveIndexXml (name, this);
 		}
 
+		protected virtual IList<UInt16>[] ParallelBuild (Func<int, IList<UInt16> > _GetKnr, string nick)
+		{
+			var len = this.MainSpace.Count;
+			var seqs = new IList<UInt16> [len];
+			int pc = len / 1000 + 1;
+			int I = 0;
+			Action<int> compute_knr = delegate (int docid) {
+				seqs [docid] = _GetKnr (docid);
+				++I; // don't care about race conditions
+				//Console.WriteLine ("===> I: {0}", I);
+				if ((I % pc) == 0) {
+					Console.WriteLine ("Parallel-Build Knr docid {0} of {1} ({2}), advance {3:0.00}%. Timestamp: {4} ",
+					                   I, len, nick, I * 100.0 / len, DateTime.Now.ToString ());
+				}
+			};
+			Parallel.For (0, len, compute_knr);
+			return seqs;
+		}
+
+		protected virtual IList<UInt16>[] SequentialBuild (Func<int, IList<UInt16> > _GetKnr, string nick)
+		{
+			var len = this.MainSpace.Count;
+			var seqs = new IList<UInt16> [len];
+			int pc = len / 1000 + 1;
+			for (int docid = 0; docid < len; docid++) {
+				seqs [docid] = _GetKnr (docid);
+				if ((docid % pc) == 0) {
+					Console.WriteLine ("Sequential-Build Knr docid {0} of {1} ({2}), advance {3:0.00}%. Timestamp: {4} ",
+					                   docid, len, nick, docid * 100.0 / len, DateTime.Now.ToString ());
+				}
+			}
+			return seqs;
+		}
+		
 		/// <summary>
 		/// (Command line) user interface. Command line like arguments (--kwarg value)
 		/// </summary>
@@ -200,101 +241,125 @@ namespace natix.SimilaritySearch
 			string name = null;
 			string space = null;
 			string spaceclass = null;
-			string indexperms = null;
+			string indexrefs = null;
 			string fromperms = null;
 			string fromknr = null;
-			OptionSet ops = new OptionSet() {
+			bool parallel_build = true;
+			int numrefs = -1;
+			
+			OptionSet ops = new OptionSet () {
 				{"indexname|index=", "Index output name", v => name = v},
 				{"space=", "Space filename", v => space = v},
 				{"spaceclass=", "Space class", v => spaceclass = v},
-				{"indexperms|indexrefs=", "SpaceRefs filename", v => indexperms = v},
+				{"indexperms|indexrefs=", "SpaceRefs filename", v => indexrefs = v},
 				{"fromperms=", "Permutants index to be used as previously computed perms index", v => fromperms = v},
 				{"fromknr=", "Permutants index to be used as previously computed index", v => fromknr = v},
-				{"knrbound=", "Knr bound (negative means knn, positive means ceiling radius in knn)", v => this.KnrBound = int.Parse(v) },
-				{"maxcand=", "Default Maxcand", v => this.Maxcand = int.Parse(v) },
+				{"knrbound=", "Knr bound (negative means knn, positive means ceiling radius in knn)", v => this.KnrBound = int.Parse (v) },
+				{"maxcand=", "Default Maxcand", v => this.Maxcand = int.Parse (v) },
+				{"sequentialbuild", "Sequential build (default parallel)", (v) => parallel_build = false },	
+				{"numrefs|numperms=", "Number of references (only if indexrefs is null) ", (v) => numrefs = int.Parse (v)}
 			};
-			ops.Parse(args);
+			ops.Parse (args);
 			if (fromknr != null && fromperms != null) {
-				Console.WriteLine("Building options for Knr {0}", this);
-				ops.WriteOptionDescriptions(Console.Out);
-				throw new ArgumentException("fromknr and fromperms are mutually exclusive options");
+				// THESE METHODS ARE MUTUALLY EXCLUSIVE
+				Console.WriteLine ("Building options for Knr {0}", this);
+				ops.WriteOptionDescriptions (Console.Out);
+				throw new ArgumentException ("fromknr and fromperms are mutually exclusive options");
 			}
 			if (fromperms == null && fromknr == null) {
-				if (name  == null || space == null || spaceclass == null || indexperms  == null || this.KnrBound == 0) {
-					Console.WriteLine("Building options for Knr {0}", this);
-					Console.WriteLine("indexname: '{0}', space: '{1}', spaceclass: '{2}', indexperms: '{3}', knrbound: {4}",
-					                  name, space, spaceclass, indexperms, this.KnrBound);
-					ops.WriteOptionDescriptions(Console.Out);
-					throw new ArgumentException("Some mandatory parameters are null");
+				// CONSTRUCTION BASE - THIS COMPUTES DISTANCES
+				if (name == null || space == null || spaceclass == null || this.KnrBound == 0) {
+					Console.WriteLine ("Building options for Knr {0}", this);
+					Console.WriteLine ("indexname: '{0}', space: '{1}', spaceclass: '{2}', indexrefs: '{3}', knrbound: {4}",
+					                  name, space, spaceclass, indexrefs, this.KnrBound);
+					ops.WriteOptionDescriptions (Console.Out);
+					throw new ArgumentException ("Some mandatory parameters are null");
 				}
-				this.Build(name, spaceclass, space, indexperms, this.Maxcand, this.KnrBound, docid => this.GetKnr(this.MainSpace[docid]) );
+				if (indexrefs == null) {
+					if (numrefs <= Math.Abs (this.KnrBound)) {
+						Console.WriteLine ("IMPORNTANT If *indexrefs* is not given, then *numrefs* > knrbound should be given to create the proper structures");
+						Console.WriteLine ("Building options for Knr {0}", this);
+						Console.WriteLine ("indexname: '{0}', space: '{1}', spaceclass: '{2}', indexrefs: '{3}', knrbound: {4}",
+						                   name, space, spaceclass, indexrefs, this.KnrBound);
+						ops.WriteOptionDescriptions (Console.Out);
+						throw new ArgumentException ("Some mandatory parameters are null");
+					}
+					var subspace = String.Format ("{0}.subspace.{1}", name, numrefs);
+					indexrefs = subspace + ".index";
+					Commands.SubSpace (subspace, spaceclass, space, numrefs, true, true);
+					var cmd = String.Format ("--build --indexname {0} --indexclass sequential --space {1} --spaceclass {2} --force", indexrefs, subspace, spaceclass);
+					Commands.Build (cmd);				
+				}
+				this.Build (name, spaceclass, space, indexrefs, this.Maxcand, this.KnrBound, docid => this.GetKnr (this.MainSpace [docid]), parallel_build);
 			} else if (fromperms != null) {
+				// CONSTRUCTION FROM AN ALREADY COMPUTED PERMS INDEX
 				if (this.KnrBound >= 0) {
-					Console.WriteLine("Building options for Knr {0}", this);
-					ops.WriteOptionDescriptions(Console.Out);					
-					throw new ArgumentException("KnrBound should be negative (knn search for knr)");	
+					Console.WriteLine ("Building options for Knr {0}", this);
+					ops.WriteOptionDescriptions (Console.Out);					
+					throw new ArgumentException ("KnrBound should be negative (knn search for knr)");	
 				}
 				if (space != null) {
-					Console.WriteLine("Building options for Knr {0}", this);
-					ops.WriteOptionDescriptions(Console.Out);					
-					throw new ArgumentException(String.Format("space will be taken from perms {0} index", fromperms));	
+					Console.WriteLine ("Building options for Knr {0}", this);
+					ops.WriteOptionDescriptions (Console.Out);					
+					throw new ArgumentException (String.Format ("space will be taken from perms {0} index", fromperms));	
 				}
-				if (name  == null || indexperms  == null) {
-					Console.WriteLine("Building options for Knr {0}", this);
-					Console.WriteLine("Checking for null> indexname: '{0}', indexperms: '{1}'", name, indexperms);
-					ops.WriteOptionDescriptions(Console.Out);
-					throw new ArgumentException("Some null parameters building 'fromperms'");
+				if (name == null || indexrefs == null) {
+					Console.WriteLine ("Building options for Knr {0}", this);
+					Console.WriteLine ("Checking for null> indexname: '{0}', indexperms: '{1}'", name, indexrefs);
+					ops.WriteOptionDescriptions (Console.Out);
+					throw new ArgumentException ("Some null parameters building 'fromperms'");
 				}
-				var iperms = (Index<T>)IndexLoader.Load(indexperms);
-				var perms = (Perms<T>)IndexLoader.Load(fromperms);
-				if (Path.GetFileName(iperms.MainSpace.Name) != Path.GetFileName(perms.spacePerms) || spaceclass != perms.spaceClass) {
-					Console.WriteLine("Building options for Knr {0}", this);
-					Console.WriteLine("=== iperms.MainSpace.Name '{0}', perms.spaceName '{1}'", iperms.MainSpace.Name, perms.spacePerms);
-					Console.WriteLine("=== spaceclass '{0}',  perms.spaceClass '{1}'",spaceclass, perms.spaceClass);
-					ops.WriteOptionDescriptions(Console.Out);
-					throw new ArgumentException("indexperms.MainSpace.Name != perms.spaceName or spaceclass != perms.spaceClass");
+				var iperms = (Index<T>)IndexLoader.Load (indexrefs);
+				var perms = (Perms<T>)IndexLoader.Load (fromperms);
+				if (Path.GetFileName (iperms.MainSpace.Name) != Path.GetFileName (perms.spacePerms) || spaceclass != perms.spaceClass) {
+					Console.WriteLine ("Building options for Knr {0}", this);
+					Console.WriteLine ("=== iperms.MainSpace.Name '{0}', perms.spaceName '{1}'", iperms.MainSpace.Name, perms.spacePerms);
+					Console.WriteLine ("=== spaceclass '{0}',  perms.spaceClass '{1}'", spaceclass, perms.spaceClass);
+					ops.WriteOptionDescriptions (Console.Out);
+					throw new ArgumentException ("indexperms.MainSpace.Name != perms.spaceName or spaceclass != perms.spaceClass");
 				}
-				string pathSpace = Dirty.CombineRelativePath(fromperms, perms.spaceName);
-				this.Build (name, perms.spaceClass, pathSpace, indexperms, this.Maxcand, this.KnrBound, docid => this.GetKnrFromPerms(docid, perms));
+				string pathSpace = Dirty.CombineRelativePath (fromperms, perms.spaceName);
+				this.Build (name, perms.spaceClass, pathSpace, indexrefs, this.Maxcand, this.KnrBound, docid => this.GetKnrFromPerms (docid, perms), parallel_build);
 			} else if (fromknr != null) {
-				Console.WriteLine("Please notice that only Knr based indexes with KnrWrap void methods should be used");
-				Console.WriteLine("(e.g. PPIndex), unless you know that the KnrWrap is not destroying the");
-				Console.WriteLine("data for your index");
+				// BUILD FROM AN ALREADY CONSTRUCTED KNR Method
+				Console.WriteLine ("Please notice that only Knr based indexes with KnrWrap void methods should be used");
+				Console.WriteLine ("(e.g. PPIndex), unless you know that the KnrWrap is not destroying the");
+				Console.WriteLine ("data for your index");
 				if (space != null) {
-					Console.WriteLine("Building options for Knr {0}", this);
-					ops.WriteOptionDescriptions(Console.Out);					
-					throw new ArgumentException(String.Format("space will be taken from perms {0} index", fromperms));	
+					Console.WriteLine ("Building options for Knr {0}", this);
+					ops.WriteOptionDescriptions (Console.Out);					
+					throw new ArgumentException (String.Format ("space will be taken from perms {0} index", fromperms));	
 				}
-				if (name == null || indexperms != null /*|| this.KnrBound != 0*/) {
-					Console.WriteLine("Building options for Knr {0}, fromknr", this);
-					Console.WriteLine("*** indexname can't be null: '{0}'", name);
-					Console.WriteLine("*** indexperms should be null: '{0}'", indexperms);
-					ops.WriteOptionDescriptions(Console.Out);
-					throw new ArgumentException("Some null parameters building 'fromknr'");
+				if (name == null || indexrefs != null /*|| this.KnrBound != 0*/) {
+					Console.WriteLine ("Building options for Knr {0}, fromknr", this);
+					Console.WriteLine ("*** indexname can't be null: '{0}'", name);
+					Console.WriteLine ("*** indexperms should be null: '{0}'", indexrefs);
+					ops.WriteOptionDescriptions (Console.Out);
+					throw new ArgumentException ("Some null parameters building 'fromknr'");
 				}
-				var permsknr = (Knr<T>)IndexLoader.Load(fromknr);
+				var permsknr = (Knr<T>)IndexLoader.Load (fromknr);
 				if (spaceclass != permsknr.spaceClass) {
-					Console.WriteLine("Building options for Knr {0}, fromknr", this);
-					Console.WriteLine("=== spaceclass '{0}',  permsknr.spaceClass '{1}'",spaceclass, permsknr.spaceClass);
-					ops.WriteOptionDescriptions(Console.Out);
-					throw new ArgumentException("spaceclass != permsknr.spaceClass");
+					Console.WriteLine ("Building options for Knr {0}, fromknr", this);
+					Console.WriteLine ("=== spaceclass '{0}',  permsknr.spaceClass '{1}'", spaceclass, permsknr.spaceClass);
+					ops.WriteOptionDescriptions (Console.Out);
+					throw new ArgumentException ("spaceclass != permsknr.spaceClass");
 				}
 				Func<int, IList<UInt16> > getknrfun;
 				if (this.KnrBound == 0) {
 					this.KnrBound = permsknr.KnrBound;
 				}
 				if (this.KnrBound < 0) {
-					getknrfun = (docid => this.KnrWrap(this.TakeFirst(permsknr.SeqSpace[docid], Math.Abs(this.KnrBound))));	
+					getknrfun = (docid => this.KnrWrap (this.TakeFirst (permsknr.SeqSpace [docid], Math.Abs (this.KnrBound))));	
 				} else {
-					getknrfun = (docid => this.KnrWrap(permsknr.SeqSpace[docid]));
+					getknrfun = (docid => this.KnrWrap (permsknr.SeqSpace [docid]));
 				}
-				string pathSpace = Dirty.CombineRelativePath(fromknr, permsknr.spaceName);
-				string pathIndexRefs = Dirty.CombineRelativePath(fromknr, permsknr.IndexRefsName);
-				this.Build (name, permsknr.spaceClass, pathSpace, pathIndexRefs, this.Maxcand, this.KnrBound, getknrfun);
+				string pathSpace = Dirty.CombineRelativePath (fromknr, permsknr.spaceName);
+				string pathIndexRefs = Dirty.CombineRelativePath (fromknr, permsknr.IndexRefsName);
+				this.Build (name, permsknr.spaceClass, pathSpace, pathIndexRefs, this.Maxcand, this.KnrBound, getknrfun, parallel_build);
 			} else {
-				Console.WriteLine("Building options for Knr {0}, fromknr", this);
-				ops.WriteOptionDescriptions(Console.Out);
-				throw new ArgumentException("Not enought options for building knr index");
+				Console.WriteLine ("Building options for Knr {0}, fromknr", this);
+				ops.WriteOptionDescriptions (Console.Out);
+				throw new ArgumentException ("Not enought options for building knr index");
 			}
 		}
 		
@@ -336,7 +401,7 @@ namespace natix.SimilaritySearch
 		/// <summary>
 		/// Wrapping function to the knr implementation
 		/// </summary>
-		protected virtual IList<UInt16> KnrWrap (IList<UInt16> a)
+		public virtual IList<UInt16> KnrWrap (IList<UInt16> a)
 		{
 			throw new NotImplementedException ("This is an abstract method");
 		}
@@ -441,11 +506,7 @@ namespace natix.SimilaritySearch
 		/// </summary>
 		public override IResult KNNSearch (T q, int k, IResult R)
 		{
-			/*Console.WriteLine ("**** KNNSEARCH this: {0}, seqspace: {1}, indexrefs: {2}****",
-				this, this.SeqSpace, this.IndexRefsName);*/
 			int maxcand = Math.Abs (this.Maxcand);
-			// Console.WriteLine ("****> MAXCAND: {0}, k: {1}, R: {2}", maxcand, k, R);
-			// var res = this.SeqSpace.CreateResult (maxcand, false);
 			IResult res = new Result (maxcand, false);
 			IList<UInt16> qseq = this.GetKnr (q);
 
@@ -456,13 +517,12 @@ namespace natix.SimilaritySearch
 					res.Push (docid, d);
 				}
 			}
-			// possible giving a new order in the candidates
+			// possible induction of a new order in the candidates
 			res = this.GetOrderingFunctions ().Filter (this, q, qseq, res);
 			if (this.Maxcand < 0) {
 				return res;
 			}
-			// The final composition, but here
-
+			// The final review
 			foreach (ResultPair p in res) {
 				double d = this.MainSpace.Dist (q, this.MainSpace [p.docid]);
 				R.Push (p.docid, d);
@@ -499,15 +559,6 @@ namespace natix.SimilaritySearch
 			} else {
 				G = W;
 			}
-			/*
-			IList<IList<int>> G = new ListGen2<IList<int>> (delegate(int x) {
-				var wx = W[permutation[x]];
-				return new ListGen<int>( (y) => wx[y], wx.Count);
-			}, null, W.Count);
-			var S = new SortSeq<int> (this.IndexRefs.MainSpace.Count);
-			S.Sort (G, permutation);
-
-			*/
 			Sorting.Sort<int> (permutation, (int a, int b) =>
 				SequenceSpace<ushort>.LexicographicCompare (G[a], G[b]));
 			Comparison<int> cmp_sort = (int a, int b) => SequenceSpace<ushort>.LexicographicCompare (G[a], G[b]);

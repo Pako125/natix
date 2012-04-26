@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/FunLists/ListCast.cs
+//   Original filename: natix/FunLists/ListCastNumberToInt.cs
 // 
 using System;
 using System.IO;
@@ -24,7 +24,7 @@ namespace natix
 	/// <summary>
 	/// List cast. Cast a list of items of T to a list of integers
 	/// </summary>
-	public class ListCast<T> : ListGenerator<int>
+	public class ListCastToInt<T> : ListGenerator<int>
 	{
 		static INumeric<T> num = (INumeric<T>)Numeric.Get (typeof(T));
 		IList<T> list;
@@ -35,7 +35,7 @@ namespace natix
 		/// <param name='list'>
 		/// The list containing items to be casted
 		/// </param>
-		public ListCast (IList<T> list)
+		public ListCastToInt (IList<T> list)
 		{
 			this.list = list;
 		}

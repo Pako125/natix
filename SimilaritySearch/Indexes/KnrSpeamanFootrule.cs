@@ -39,35 +39,47 @@ namespace natix.SimilaritySearch
 		/// <summary>
 		/// Knr wrapper for footrule
 		/// </summary>
-		protected override IList<UInt16> KnrWrap (IList<UInt16> a)
+		public override IList<UInt16> KnrWrap (IList<UInt16> a)
+		{
+			return StaticKnrWrap (a);
+		}
+
+		public static IList<UInt16> StaticKnrWrap (IList<UInt16> a)
 		{
 			int aL = a.Count;
 			UInt16[] idx = new UInt16[aL];
 			for (ushort i = 0; i < aL; i++) {
-				idx[i] = i;
+				idx [i] = i;
 			}
 			Sorting.Sort<UInt16, UInt16> (a, idx);
 			UInt16[] v = new UInt16[aL * 2];
 			for (int i = 0, ii = 0; i < aL; i++,ii++) {
-				v[ii] = a[i];
+				v [ii] = a [i];
 				ii++;
-				v[ii] = idx[i];
+				v [ii] = idx [i];
 			}
 			return v;
 		}
+		
 
 		/// <summary>
 		/// Knr footrule
 		/// </summary>
 		public override double KnrDist (IList<UInt16> a, IList<UInt16> b)
 		{
+			return StaticKnrDist (a, b, (a.Count + b.Count) << 3);
+		}
+		
+		public static double StaticKnrDist (IList<UInt16> a, IList<UInt16> b, int P)
+		{
 			// a & b are already sorted
 			// union
 			// penalization
-			int P = (a.Count + b.Count) << 1;
+			// int P = this.IndexRefs.MainSpace.Count >> 1;
 			double d = 0;
 			//Console.WriteLine ("====> a.Len {0}, b.Len {1}", a.Length, b.Length);
-			for (int ia = 0, ib = 0; ia < a.Count && ib < b.Count;) {
+			int ia = 0, ib = 0;
+			while( ia < a.Count && ib < b.Count ) {
 				//Console.Write ("Ini> ia: {0}, ib: {1}, ", ia, ib);
 				if (a [ia] == b [ib]) {
 					double m = Math.Abs (a [ia + 1] - b [ib + 1]);
@@ -81,9 +93,13 @@ namespace natix.SimilaritySearch
 					ib += 2;
 					d += P;
 				}
-				//Console.WriteLine ("Fin> ia: {0}, ib: {1}", ia, ib);
 			}
+			d += ((a.Count - ia) >> 1) * P;
+			d += ((b.Count - ib) >> 1) * P;
+			// Console.WriteLine ("Fin> a.count: {0}, ia: {1} /// b.count: {2}, ib: {3}", a.Count, ia, b.Count, ib);
+
 			return d;
 		}		
+
 	}
 }

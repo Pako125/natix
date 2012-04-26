@@ -76,9 +76,9 @@ namespace natix.SimilaritySearch
 		/// <summary>
 		///  Create a new inverted index
 		/// </summary>
-		public override void Build (string name, string spaceClass, string spaceName, string indexpermsname, int maxcand, int knrbound, Func<int, IList<ushort> > _GetKnr)
+		public override void Build (string name, string spaceClass, string spaceName, string indexpermsname, int maxcand, int knrbound, Func<int, IList<ushort> > _GetKnr, bool parallel_build)
 		{
-			base.Build (name, spaceClass, spaceName, indexpermsname, maxcand, knrbound, _GetKnr);
+			base.Build (name, spaceClass, spaceName, indexpermsname, maxcand, knrbound, _GetKnr, parallel_build);
 			this.CreateInvertedFile (name, true);
 		}
 		
@@ -97,7 +97,6 @@ namespace natix.SimilaritySearch
 			base.Configure (args);
 		}
 		
-
 		public override void Build (IEnumerable<string> args)
 		{
 			OptionSet ops = new OptionSet() {
@@ -111,7 +110,7 @@ namespace natix.SimilaritySearch
 		/// <summary>
 		/// Wrap the knr sequence
 		/// </summary>
-		protected override IList<ushort> KnrWrap (IList<ushort> a)
+		public override IList<ushort> KnrWrap (IList<ushort> a)
 		{
 			return a;
 		}

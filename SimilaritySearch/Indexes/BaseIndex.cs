@@ -130,7 +130,7 @@ namespace natix.SimilaritySearch
 		/// </summary>
 		public virtual string IndexType {
 			get {
-				return this.GetType ().FullName;
+				return this.GetType ().ToString ();
 			}
 			set {}
 		}

@@ -17,6 +17,7 @@
 // 
 using System;
 using System.Collections.Generic;
+using natix.CompactDS;
 
 namespace natix.Sets
 {
@@ -26,14 +27,17 @@ namespace natix.Sets
 		{
 		}
 		
-		public IList<int> ComputeUI (IList<IList<IList<int>>> sets)
+		public IList<int> ComputeUI (IList<IList<IRankSelect>> sets)
 		{
 			var A = new Dictionary<int, int> ();
 			var lambda = sets.Count;
 			var L = new List<int> ();
 			foreach (var list in sets) {
-				foreach (var alist in list) {
-					foreach (var item in alist) {
+				foreach (var rs in list) {
+					// foreach (var item in alist) {
+					var count1 = rs.Count1;
+					for (int i = 1; i <= count1; ++i) {
+						var item = rs.Select1 (i);
 						int counter;
 						if (A.TryGetValue (item, out counter)) {
 							counter++;

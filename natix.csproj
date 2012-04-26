@@ -102,7 +102,6 @@
     <Compile Include="SimilaritySearch\Indexes\LC_RNN.cs" />
     <Compile Include="Util\RandomSets.cs" />
     <Compile Include="SimilaritySearch\Indexes\LC_FixedM.cs" />
-    <Compile Include="SimilaritySearch\Indexes\PolyIndexLC.cs" />
     <Compile Include="SimilaritySearch\Dirty.cs" />
     <Compile Include="SimilaritySearch\Indexes\LC_IRNN.cs" />
     <Compile Include="SimilaritySearch\Indexes\KnrJaccard.cs" />
@@ -238,8 +237,6 @@
     <Compile Include="Sets\UnionIntersection\IUnionIntersection.cs" />
     <Compile Include="FunLists\ListShiftIndex.cs" />
     <Compile Include="FunLists\ListIntegersShiftValues.cs" />
-    <Compile Include="FunLists\ListCast.cs" />
-    <Compile Include="FunLists\ListCast2.cs" />
     <Compile Include="Numeric\INumeric.cs" />
     <Compile Include="Numeric\Numeric.cs" />
     <Compile Include="Numeric\NumericByte.cs" />
@@ -300,6 +297,16 @@
     <Compile Include="CompactDS\Lists\ShiftedSortedListRS.cs" />
     <Compile Include="CompactDS\Bitmaps\BitStreamCtxRL.cs" />
     <Compile Include="SimilaritySearch\Indexes\MLSC.cs" />
+    <Compile Include="SimilaritySearch\Indexes\PolyIndexLC.cs" />
+    <Compile Include="SimilaritySearch\Indexes\PolyIndexLC_Approx.cs" />
+    <Compile Include="SimilaritySearch\Indexes\KnrSeqSearch.cs" />
+    <Compile Include="CompactDS\Lists\DividedSortedListRS.cs" />
+    <Compile Include="FunLists\ListCastToInt.cs" />
+    <Compile Include="FunLists\ListCastFromInt.cs" />
+    <Compile Include="SimilaritySearch\Indexes\KnrSeqSearchJaccard.cs" />
+    <Compile Include="SimilaritySearch\Indexes\KnrSeqSearchRelMatches.cs" />
+    <Compile Include="SimilaritySearch\Indexes\KnrSeqSearchFootrule.cs" />
+    <Compile Include="SimilaritySearch\Indexes\KnrSeqSearchSpearmanRho.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

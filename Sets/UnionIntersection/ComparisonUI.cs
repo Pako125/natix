@@ -17,6 +17,7 @@
 // 
 using System;
 using System.Collections.Generic;
+using natix.CompactDS;
 
 namespace natix.Sets
 {
@@ -29,7 +30,7 @@ namespace natix.Sets
 			this.ialg = alg;
 		}
 		
-		public IList<int> ComputeUI (IList<IList<IList<int>>> sets)
+		public IList<int> ComputeUI (IList<IList<IRankSelect>> sets)
 		{
 			var L = new IList<int>[sets.Count];
 			int i = 0;
@@ -45,19 +46,24 @@ namespace natix.Sets
 			return new List<int> (u);
 		}
 		
-		IList<int> Union (IList<IList<int>> disjoint_sets)
+		IList<int> Union (IList<IRankSelect> disjoint_sets)
 		{
 			HashSet<int > S = new HashSet<int> ();
-			foreach (var list in disjoint_sets) {
-				foreach (var item in list) {
+			foreach (var rs in disjoint_sets) {
+				var count1 = rs.Count1;
+				for (int i = 1; i < count1; ++i) {
+					//foreach (var item in list) {
+					var item = rs.Select1 (i);
 					S.Add (item);
 				}
 			}
 			var L = new int[S.Count];
-			int i = 0;
-			foreach (var item in S) {
-				L [i] = item;
-				i++;
+			{
+				int i = 0;
+				foreach (var item in S) {
+					L [i] = item;
+					i++;
+				}
 			}
 			Array.Sort (L);
 			return L;

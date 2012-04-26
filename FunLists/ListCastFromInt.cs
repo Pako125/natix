@@ -24,7 +24,7 @@ namespace natix
 	/// <summary>
 	/// List cast2. Cast an integer list to a list of type T
 	/// </summary>
-	public class ListCast2<T> : ListGenerator<T>
+	public class ListCastFromInt<T> : ListGenerator<T>
 	{
 		static INumeric<T> num = (INumeric<T>)Numeric.Get (typeof(T));
 		IList<int> list;
@@ -35,7 +35,7 @@ namespace natix
 		/// <param name='list'>
 		/// The list containing items to be casted
 		/// </param
-		public ListCast2 (IList<int> list)
+		public ListCastFromInt (IList<int> list)
 		{
 			this.list = list;
 		}

@@ -47,14 +47,15 @@ namespace natix.SimilaritySearch
 			P *= P;
 			double d = 0;
 			//Console.WriteLine ("====> a.Len {0}, b.Len {1}", a.Length, b.Length);
-			for (int ia = 0, ib = 0; ia < a.Count && ib < b.Count;) {
+			int ia = 0, ib = 0;
+			while ( ia < a.Count && ib < b.Count ) {
 				//Console.Write ("Ini> ia: {0}, ib: {1}, ", ia, ib);
-				if (a[ia] == b[ib]) {
-					double m = a[ia + 1] - b[ib + 1];
+				if (a [ia] == b [ib]) {
+					double m = a [ia + 1] - b [ib + 1];
 					d += m * m;
 					ia += 2;
 					ib += 2;
-				} else if (a[ia] < b[ib]) {
+				} else if (a [ia] < b [ib]) {
 					ia += 2;
 					d += P;
 				} else {
@@ -63,6 +64,8 @@ namespace natix.SimilaritySearch
 				}
 				//Console.WriteLine ("Fin> ia: {0}, ib: {1}", ia, ib);
 			}
+			d += ((a.Count - ia) >> 1) * P;
+			d += ((b.Count - ib) >> 1) * P;
 			return d;
 		}
 	}

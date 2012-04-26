@@ -17,6 +17,7 @@
 // 
 using System;
 using System.Collections.Generic;
+using natix.CompactDS;
 
 namespace natix.Sets
 {
@@ -29,8 +30,8 @@ namespace natix.Sets
 		/// L = LA \cap LB \cap ...
 		/// </summary>
 		
-		IList<int> ComputeUI (IList<IList<IList<int>>> sets);
-
+		// IList<int> ComputeUI (IList<IList<IList<int>>> sets);
+		IList<int> ComputeUI (IList<IList<IRankSelect>> sets);
 	}
 }
 

@@ -38,7 +38,7 @@ namespace natix.SimilaritySearch
 		/// <summary>
 		/// The wrapper function to the knr sequence
 		/// </summary>
-		protected override IList<UInt16> KnrWrap (IList<UInt16> a)
+		public override IList<UInt16> KnrWrap (IList<UInt16> a)
 		{
 			return a;
 		}
@@ -51,7 +51,8 @@ namespace natix.SimilaritySearch
 			for (i = 0; i < min && a[i] == b[i]; i++) {
 				//empty
 			}
-			return 1.0 / (i + 0.01);
+			return -i;
+			// return 1.0 / (i + 0.01);
 		}
 	}
 }

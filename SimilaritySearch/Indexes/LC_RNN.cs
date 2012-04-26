@@ -438,7 +438,7 @@ namespace natix.SimilaritySearch
 			}
 		}
 		
-		public virtual IEnumerable<IList<int>> PartialKNNSearch (T q, int K, IResult R, IDictionary<int,double> cache)
+		public virtual IEnumerable<IRankSelect> PartialKNNSearch (T q, int K, IResult R, IDictionary<int,double> cache)
 		{
 			//if (cache_space == null) {
 			//	cache_space = this.MainSpace;
@@ -469,7 +469,8 @@ namespace natix.SimilaritySearch
 				var oid = this.CENTERS [center];
 				var dcq = cache [oid];
 				if (dcq <= R.CoveringRadius + this.COV [center]) {
-					yield return new SortedListRS(this.SEQ.Unravel(center));
+					//yield return new SortedListRS(this.SEQ.Unravel(center));
+					yield return this.SEQ.Unravel(center);
 				}
 			}
 		}
@@ -478,14 +479,15 @@ namespace natix.SimilaritySearch
 		/// Partial radius search
 		/// </summary>
 
-		public virtual IList<IList<int>> PartialSearch (T q, double qrad, IResult R, IDictionary<int,double> cache)
+		public virtual IList<IRankSelect> PartialSearch (T q, double qrad, IResult R, IDictionary<int,double> cache)
 		{
 			//if (cache_space == null) {
 			//	cache_space = this.MainSpace;
 			//}
 			var sp = this.MainSpace;
 			int len = this.CENTERS.Count;
-			IList<IList<int>> output_list = new List<IList<int>> ();
+			//IList<IList<int>> output_list = new List<IList<int>> ();
+			IList<IRankSelect> output_list = new List<IRankSelect> ();
 			for (int center_id = 0; center_id < len; center_id++) {
 				double dcq = -1;
 				var oid = this.CENTERS [center_id];
@@ -505,7 +507,8 @@ namespace natix.SimilaritySearch
 				}
 				if (dcq <= qrad + this.COV [center_id]) {
 					// output_list.Add (this.invindex [center_id]);
-					output_list.Add (new SortedListRS (this.SEQ.Unravel (center_id)));
+					//output_list.Add (new SortedListRS (this.SEQ.Unravel (center_id)));
+					output_list.Add (this.SEQ.Unravel (center_id));
 				}
 			}
 			return output_list;

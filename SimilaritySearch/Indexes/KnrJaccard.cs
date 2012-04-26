@@ -39,7 +39,7 @@ namespace natix.SimilaritySearch
 		/// <summary>
 		/// Wraps the Knr sequence
 		/// </summary>
-		protected override IList<UInt16> KnrWrap (IList<UInt16> a)
+		public override IList<UInt16> KnrWrap (IList<UInt16> a)
 		{
 			Sorting.Sort<UInt16> (a);
 			return a;
