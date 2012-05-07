@@ -73,7 +73,7 @@ namespace natix.SimilaritySearch
 				}
 			}
 			var seqbuilder = SequenceBuilders.GetSeqXLB_SArray64 (16);
-			//var seqbuilder = SequenceBuilders.GetWT_GGMN_BinaryCoding (16);
+			//var seqbuilder = SequenceBuilders.GetGolynskiSucc (16);
 			var S_int = new ListGen<int> ((int i) => (int)S [i], S.Length); 
 			this.seqindex = seqbuilder (S_int, this.IndexRefs.MainSpace.Count);
 			using (var Output = new BinaryWriter(File.Create (name + ".seqindex"))) {
@@ -85,11 +85,14 @@ namespace natix.SimilaritySearch
 		/// <summary>
 		/// Gets the candidates. 
 		/// </summary>
-		protected virtual void GetCandidates (IList<ushort> qseq, out IList<int> C_docs, out IList<short> C_sim)
+		protected virtual IResult GetCandidatesSmall (IList<ushort> qseq)
 		{
 			int knrbound = Math.Abs (this.KnrBoundBuild);
 			var len_qseq = qseq.Count;
+			var n = this.MainSpace.Count;
 			var A = new byte[this.MainSpace.Count];
+			// var A = new ListIFS (ListIFS.GetNumBits (knrbound));
+			// A.Add (0, n);
 			for (int i = 0; i < len_qseq; ++i) {
 				var rs = this.seqindex.Unravel (qseq [i]);
 				var count1 = rs.Count1;
@@ -103,44 +106,60 @@ namespace natix.SimilaritySearch
 					}
 				}
 			}
-			C_docs = new List<int> ();
-			C_sim = new List<short> ();
-			for (int i = 0; i < A.Length; ++i) {
+			var res = new ResultTies (Math.Abs (this.Maxcand), false);
+			for (int i = 0; i < n; ++i) {
 				if (A [i] == 0) {
 					continue;
 				}
-				C_docs.Add (i);
-				C_sim.Add ((short)-A [i]);
+				res.Push (i, -A [i]);
 			}
-			Sorting.Sort<short,int> (C_sim, C_docs);
+			return res;
 		}
 		
+		protected virtual IResult GetCandidates (IList<ushort> qseq)
+		{
+			var n = this.MainSpace.Count;
+			if (n < 500000) {
+				return this.GetCandidatesSmall (qseq);
+			}
+			int maxcand = Math.Abs (this.Maxcand);
+			int knrbound = Math.Abs (this.KnrBoundBuild);
+			var len_qseq = qseq.Count;
+			var ialg = new BaezaYatesIntersection (new DoublingSearch<int> ());
+			IList<int> C = new SortedListRS (this.seqindex.Unravel (qseq [0]));
+			int i = 1;
+			while (i < len_qseq && C.Count > maxcand) {
+				var rs = this.seqindex.Unravel (qseq [i]);
+				var I = new ShiftedSortedListRS (rs, -i);
+				var L = new List<IList<int>> () {C, I};
+				var tmp = ialg.Intersection (L);
+				++i;
+				if (tmp.Count < maxcand) {
+					break;
+				}
+				C = tmp;
+			}
+			var res = new ResultTies (int.MaxValue, false);
+			foreach (var c in C) {
+				if (c % knrbound == 0) {
+					res.Push (c / knrbound, 0);
+				}
+			}
+			return res;
+		}
 		
 		public override IResult KNNSearch (T q, int K, IResult R)
 		{
-			var qseq = this.GetKnr (q);			
-			IList<int> C_docs;
-			IList<short> C_sim;
+			var qseq = this.GetKnr (q);
 			// this.GetCandidatesIntersection (qseq, out C_docs, out C_sim);
 			// this.GetCandidatesRelativeMatches (qseq, out C_docs, out C_sim);
-			this.GetCandidates (qseq, out C_docs, out C_sim);
-			// possible giving a new order in the candidates
-			// res = this.GetOrderingFunctions ().Filter (this, q, qseq, res);
-			// computing the final order
-			var num_cand = Math.Min (Math.Abs (this.Maxcand), C_docs.Count);
+			var C = this.GetCandidates (qseq);
 			// Console.WriteLine ("XXXXXXXX MAXCAND: {0}", this.Maxcand);
 			if (this.Maxcand < 0) {
-				for (int i = 0; i < num_cand; ++i) {		
-					var docid = C_docs [i];
-					double d = 0;
-					if (C_sim != null) {
-						d = C_sim [i];
-					}
-					R.Push (docid, d);
-				}
+				return C;
 			} else {
-				for (int i = 0; i < num_cand; ++i) {		
-					var docid = C_docs [i];
+				foreach (var p in C) {
+					var docid = p.docid;
 					double d = this.MainSpace.Dist (q, this.MainSpace [docid]);
 					R.Push (docid, d);
 				}

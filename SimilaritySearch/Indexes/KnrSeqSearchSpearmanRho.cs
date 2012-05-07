@@ -27,7 +27,7 @@ namespace natix.SimilaritySearch
 		{
 		}
 
-		protected override void GetCandidates (IList<ushort> qseq, out IList<int> C_docs, out IList<short> C_sim)
+		protected override IResult GetCandidates (IList<ushort> qseq)
 		{
 			int knrbound = Math.Abs (this.KnrBoundBuild);
 			var len_qseq = qseq.Count;
@@ -37,6 +37,7 @@ namespace natix.SimilaritySearch
 			for (int i = 0; i < len_qseq; ++i) {
 				var rs = this.seqindex.Unravel (qseq [i]);
 				var count1 = rs.Count1;
+				// Console.WriteLine ("seq: {0}/{1}, class: {2}, count1: {3}", i, len_qseq, this.seqindex, count1);
 				for (int s = 1; s <= count1; ++s) {
 					var pos = rs.Select1 (s);
 					var docid = pos / knrbound;
@@ -49,15 +50,15 @@ namespace natix.SimilaritySearch
 					//C [docid] = dist + diff - omega;
 				}
 			}
-			C_docs = new List<int> (C.Count);
-			C_sim = new List<short> (C.Count);
+			//Chronos chronos = new Chronos ();
+			//chronos.Begin ();
+			var res = new ResultTies (Math.Abs (this.Maxcand), false);
 			foreach (var pair in C) {
-				C_docs.Add (pair.Key);
-				C_sim.Add ((short)Math.Sqrt (pair.Value));
-				// C_sim.Add ((short)pair.Value);
+				res.Push (pair.Key, (short)Math.Sqrt (pair.Value));
 			}
-			Sorting.Sort<short,int> (C_sim, C_docs);
-			// Console.WriteLine ("XXXXXXXXXX SPEARMAN RHO");
+			//chronos.End ();
+			//chronos.PrintStats ();
+			return res;
 		}
 	}
 }

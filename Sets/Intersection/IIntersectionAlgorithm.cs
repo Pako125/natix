@@ -27,6 +27,6 @@ namespace natix.Sets
 			get;
 		}
 		// IEnumerable<int> Intersection(List< int[] > postingList);
-		IEnumerable<int> Intersection (IList< IList<int> > postingList);
+		IList<int> Intersection (IList< IList<int> > postingList);
 	}
 }

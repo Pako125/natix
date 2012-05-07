@@ -307,6 +307,7 @@
     <Compile Include="SimilaritySearch\Indexes\KnrSeqSearchRelMatches.cs" />
     <Compile Include="SimilaritySearch\Indexes\KnrSeqSearchFootrule.cs" />
     <Compile Include="SimilaritySearch\Indexes\KnrSeqSearchSpearmanRho.cs" />
+    <Compile Include="SimilaritySearch\Indexes\MCCLSC.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

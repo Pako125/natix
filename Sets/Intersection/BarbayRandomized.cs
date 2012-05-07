@@ -41,7 +41,7 @@ namespace natix.Sets
 			Sorting.Sort<int> (I, (int a, int b) => (this.r.Next () % 3) - 1);
 		}
 		
-		public IEnumerable<int> Intersection (IList<IList<int>> postings)
+		public IList<int> Intersection (IList<IList<int>> postings)
 		{
 			int k = postings.Count;
 			int[] L = new int[k];

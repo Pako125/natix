@@ -45,10 +45,18 @@ namespace natix.SimilaritySearch
 		///  The average time in seconds
 		/// </summary>
 		public double avg_seconds = -1;
-		/// <summary>Covering ratio (of radius). Arithmetic mean</summary>
-		//public double mean_covering_ratio = 0;
-		/// <summary>Covering ratio (of radius). Standard deviation</summary>
-		//public double stddev_covering_ratio = 0;
+		/// <summary>
+		/// Average covering radius
+		/// </summary>
+		public double avg_covering_radius = 0;
+		/// <summary>
+		/// Average covering radius (basis)
+		/// </summary>
+		public double avg_covering_radius_basis = 0;
+		/// <summary>
+		/// The empty results count
+		/// </summary>
+		public int empty_results;
 		/// <summary>
 		///  The average cost
 		/// </summary>
@@ -152,11 +160,11 @@ namespace natix.SimilaritySearch
 			this.avg_result_size = 0;
 			this.avg_basis_size = 0;
 			this.avg_recall_by_name = 0;
-			// Console.WriteLine ("Parametriz.Checkcand {0}", checkcand);
+			this.avg_covering_radius = 0;
 			double size = this.Count;
 			double cost_internal = 0;
 			double cost_external = 0;
-			// double basis_mean_covering_ratio = 0;
+
 			for (int i = 0; i < size; i++) {
 				int basisSize = Math.Min (maxBasisSize, basis [i].result.Count);
 				int resultSize = Math.Min (maxResultSize, this [i].result.Count);
@@ -171,8 +179,16 @@ namespace natix.SimilaritySearch
 				cost_external += this [i].cost.External / size;
 				this.avg_result_size += resultSize;
 				this.avg_basis_size += basisSize;
-				//basis_mean_covering_ratio += basis [i].result [resultSize - 1].dist;
-				//this.mean_covering_ratio += this [i].result [resultSize - 1].dist;
+				if (resultSize < 1 || basisSize < 1) {
+					this.empty_results++;
+				} else {
+					this.avg_covering_radius += this [i].result [resultSize - 1].dist;
+					this.avg_covering_radius_basis += basis [i].result [basisSize - 1].dist;
+				}
+			}
+			if (this.empty_results != size) {
+				this.avg_covering_radius /= (size - this.empty_results);
+				this.avg_covering_radius_basis /= (size - this.empty_results);				
 			}
 			this.avg_result_size /= (int)size;
 			this.avg_basis_size /= (int)size;
@@ -180,17 +196,9 @@ namespace natix.SimilaritySearch
 			this.avg_seconds = sec / size;
 			this.avg_cost.External = (int)cost_external;
 			this.avg_cost.Internal = (int)cost_internal;
-			this.avg_recall_by_name /= size;
-			//this.mean_covering_ratio /= size;
-			//for (int i = 0; i < size; i++) {
-			//	int basisSize = Math.Min (maxBasisSize, basis [i].result.Count);
-			//	int resultSize = Math.Min (maxResultSize, this [i].result.Count);
-				//double m = 
-				//this.stddev_covering_ratio += m;
-			//}
-			//this.stddev_covering_ratio;
-				
+			this.avg_recall_by_name /= size;			
 		}
+		
 		/// <summary>
 		/// The representing string for this instance
 		/// </summary>
@@ -210,12 +218,13 @@ namespace natix.SimilaritySearch
 				s.WriteLine ("avg_cost_internal: {0}", this.avg_cost.Internal);
 				s.WriteLine ("avg_cost_external: {0}", this.avg_cost.External);
 				s.WriteLine ("saved_results: {0}", this.Count);
-				//s.WriteLine ("mean_covering_ratio", this.)
-				//s.WriteLine("check_results: {0}", this.checkcand);
+				s.WriteLine ("avg_covering_radius_basis: {0}", this.avg_covering_radius_basis);
+				s.WriteLine ("avg_covering_radius_result: {0}", this.avg_covering_radius);
+				s.WriteLine ("empty_results_count: {0}", this.empty_results);
 			} else {
 				if (header) {
 					s.WriteLine ("#filename: {0} - {1}", indexname, queryfile);
-					s.WriteLine ("#columns: indexname, queryfile, avg_basis_size, avg_result_size, avg_recall, avg_recall_by_name, avg_seconds, avg_cost_internal, avg_cost_external, resname");
+					s.WriteLine ("#columns: indexname, queryfile, avg_basis_size, avg_result_size, avg_recall, avg_recall_by_name, avg_seconds, avg_cost_internal, avg_cost_external, resname, avg_covering_radius_basis, avg_covering_radius_result, empty_results_count");
 				}
 				s.Write ("{0}", this.indexname);
 				s.Write (" {0}", this.queryfile);
@@ -227,6 +236,9 @@ namespace natix.SimilaritySearch
 				s.Write (" {0}", this.avg_cost.Internal);
 				s.Write (" {0}", this.avg_cost.External);
 				s.Write (" {0}", this.Name);
+				s.Write (" {0}", this.avg_covering_radius_basis);
+				s.Write (" {0}", this.avg_covering_radius);
+				s.Write (" {0}", this.empty_results);
 			}
 			return s.ToString ();
 		}

@@ -13,7 +13,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-//   Original filename: natix/SimilaritySearch/Indexes/MLSC.cs
+//   Original filename: natix/SimilaritySearch/Indexes/MCCLSC.cs
 // 
 using System;
 using System.IO;
@@ -27,17 +27,17 @@ namespace natix.SimilaritySearch
 {
 
 	/// <summary>
-	/// Multiple locality sensitive hashing sequences
+	/// Multiple (coupled compressed) locality sensitive hashing sequences
 	/// </summary>
-	public abstract class MLSC<T> : BaseIndex<T>
+	public abstract class MCCLSC<T> : BaseIndex<T>
 	{
 		LSC<T>[] lsc_indexes;
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public MLSC () : base()
+		public MCCLSC () : base()
 		{
-			this.SeqBuilder = SequenceBuilders.GetSeqXLB_SArray64 (16);
+			this.SeqBuilder = SequenceBuilders.GetSeqXLB_DiffSet64 (16, 31, new EliasDelta64 ());
 		}
 		
 		public SequenceBuilder SeqBuilder {
@@ -64,7 +64,7 @@ namespace natix.SimilaritySearch
 			var lines = File.ReadAllLines (indexName + ".lsc_list");
 			this.lsc_indexes = new LSC<T>[lines.Length];
 			for (int i = 0; i < lines.Length; ++i) {
-				this.lsc_indexes [i] = (LSC<T>)IndexLoader.Load (lines [i]);
+				this.lsc_indexes [i] = (LSC<T>)IndexLoader.Load (lines [i], "lsc");
 			}
 		}
 
@@ -77,17 +77,16 @@ namespace natix.SimilaritySearch
 		
 		public override IResult KNNSearch (T q, int K, IResult R)
 		{
-			// var seq_base = this.lsc_indexes [0].GetSeq () as SeqXLB;
-			//if (seq_base == null) {
-			//	throw new ArgumentNullException ("Currently only SeqXLB instances are allowed");
-			//}
-			// var perm = seq_base.GetPERM ();
+			var seq_base = this.lsc_indexes [0].GetSeq () as SeqXLB;
+			if (seq_base == null) {
+				throw new ArgumentNullException ("Currently only SeqXLB instances are allowed");
+			}
+			var perm = seq_base.GetPERM ();
 			var Q = this.lsc_indexes [0].GetCandidates (q);
 			for (int i = 1; i < this.lsc_indexes.Length; ++i) {
 				var P = this.lsc_indexes [i].GetCandidates (q);
 				foreach (var item in P) {
-					//Q.Add (perm [item]);
-					Q.Add (item);
+					Q.Add (perm [item]);
 				}
 			}
 			if (K < 0) {
@@ -131,9 +130,9 @@ namespace natix.SimilaritySearch
 		}
 	}
 	
-	public class HammingMLSC : MLSC<IList<byte>>
+	public class HammingMCCLSC : MCCLSC<IList<byte>>
 	{
-		public HammingMLSC() : base()
+		public HammingMCCLSC() : base()
 		{
 		}
 		
@@ -144,17 +143,22 @@ namespace natix.SimilaritySearch
 			this.LoadSpace ();
 			
 			var filename_list = new List<string> ();
-			// IPermutation perm = null;
+			IPermutation perm = null;
 			for (int i = 0; i < numInstances; ++i) {
 				var lsc = new HammingLSC ();
 				var _indexName = indexName + String.Format (".instance-{0:00}.xml", i);
 				lsc.SeqBuilder = this.SeqBuilder;
-				lsc.Build (_indexName, spaceClass, spaceName, sampleSize);
-				lsc = (HammingLSC)IndexLoader.Load (_indexName);
-				/*var seq = lsc.GetSeq () as SeqXLB;
-				if (seq == null) {
-					throw new ArgumentException ("SeqBuilder should return a SeqXLB instance");
-				}*/
+				if (i == 0) {
+					lsc.Build (_indexName, spaceClass, spaceName, sampleSize);
+					lsc = (HammingLSC)IndexLoader.Load (_indexName);
+					var seq = lsc.GetSeq () as SeqXLB;
+					if (seq == null) {
+						throw new ArgumentException ("SeqBuilder should return a SeqXLB instance");
+					}
+					perm = seq.GetPERM ();
+				} else {
+					lsc.Build (_indexName, spaceClass, spaceName, sampleSize, (int p) => this.MainSpace [perm [p]]);
+				}
 				filename_list.Add (_indexName);
 			}
 			Dirty.SaveIndexXml (indexName, this);

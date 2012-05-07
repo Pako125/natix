@@ -33,7 +33,7 @@ namespace natix.SimilaritySearch
 		/// <summary>
 		/// Gets the candidates. 
 		/// </summary>
-		protected override void GetCandidates (IList<ushort> qseq, out IList<int> C_docs, out IList<short> C_sim)
+		protected override IResult GetCandidates (IList<ushort> qseq)
 		{
 			// TODO store tsearch as an object property
 			ITThresholdAlgorithm tsearch = new NTTArray8 (-1, false);
@@ -50,14 +50,14 @@ namespace natix.SimilaritySearch
 			IList<int> __C_docs;
 			IList<short> __C_sim;
 			tsearch.SearchTThreshold (lists, 1, out __C_docs, out __C_sim);
-			C_docs = new List<int> ();
-			C_sim = new List<short> ();
+			var res = new ResultTies (Math.Abs (this.Maxcand), false);
 			for (int i = 0; i < __C_docs.Count; ++i) {
 				var docid = __C_docs [i] - len_qseq;
-				C_docs.Add (docid / knrbound);
-				C_sim.Add ((short)-__C_sim [i]);
+				docid = docid / knrbound;
+				var sim = -__C_sim [i];
+				res.Push (docid, sim);
 			}
-			Sorting.Sort<short,int> (C_sim, C_docs);
+			return res;
 		}
 		
 	}

@@ -78,7 +78,7 @@ namespace natix.Sets
 			}
 		}
 
-		public virtual IEnumerable<int> Intersection (IList< IList<int> > postings)
+		public virtual IList<int> Intersection (IList< IList<int> > postings)
 		{
 			int k = postings.Count;
 			Sorting.Sort< IList<int> > (postings, (IList<int> a, IList<int> b) => a.Count - b.Count);

@@ -55,7 +55,6 @@ namespace natix.SimilaritySearch
 		public static Dictionary<string, Func<Type> > IndexFactory = new Dictionary<string, Func<Type>>() {
 			{"bkt", () => typeof(Bkt<>)},
 			{"sequential", () => typeof(Sequential<>)},
-			// {"knrinvindex", () => typeof(KnrInvIndex<>)},
 			{"knrseqsearch", () => typeof(KnrSeqSearch<>)},
 			{"knrseqsearchjaccard", () => typeof(KnrSeqSearchJaccard<>)},
 			{"knrseqsearchfootrule", () => typeof(KnrSeqSearchFootrule<>)},
@@ -87,12 +86,11 @@ namespace natix.SimilaritySearch
 			{"lshhamming", () => typeof(HammingLSH)},
 			{"lschamming", () => typeof(HammingLSC)},
 			{"mlschamming", () => typeof(HammingMLSC)},
+			{"mcclschamming", () => typeof(HammingMCCLSC)},
 			{"pivinvindex", () => typeof(PivInvIndex<>) },
 			{"lcirnn", () => typeof(LC_IRNN<>)},
 			{"lcprnn", () => typeof(LC_PRNN<>)},
 			{"lcpfixedm", () => typeof(LC_PFixedM<>)},
-			//{"lcirnncutlen", () => typeof(LC_IRNN_CUT_LEN<>)}, // comment out after review the algorithm
-			//{"lcirnncutrad", () => typeof(LC_IRNN_CUT_RAD<>)}, // comment out after review the algorithm
 			{"lcrnn", () => typeof(LC_RNN<>)},
 			// {"lcknn", () => typeof(LC_KNN<>)},
 			{"lcfixedm", () => typeof(LC_FixedM<>)},
@@ -145,7 +143,7 @@ namespace natix.SimilaritySearch
 			return idx;
 		}
 		
-		public static Index Load (string name, string indexClass, string spaceClass, IDictionary<string, object> config)
+		public static Index Load (string name, string indexClass, string spaceClass, IDictionary<string, object> config, Action<Index> after_load_action = null)
 		{
 			Type indexType;
 			Console.WriteLine ("*** Loading index: {0}", name);
@@ -156,6 +154,9 @@ namespace natix.SimilaritySearch
 			}
 			// Index idx = (Index)Dirty.DeserializeXML (name, indexType);
 			Index idx = Dirty.LoadIndexXml (name, indexType);
+			if (after_load_action != null) {
+				after_load_action (idx);
+			}
 			idx.FinalizeLoad (name, config);
 			return idx;
 		}
@@ -185,7 +186,7 @@ namespace natix.SimilaritySearch
 		/// Load an index from xml file. It automatically calls FinalizeLoad
 		/// </summary>
 
-		public static Index Load (string name, string indexClass = null, IDictionary<string, object> config = null)
+		public static Index Load (string name, string indexClass = null, IDictionary<string, object> config = null, Action<Index> after_load_action = null)
 		{
 			string spaceClass = null;
 			string _indexClass = null;
@@ -200,7 +201,7 @@ namespace natix.SimilaritySearch
 			if (indexClass == null) {
 				throw new ArgumentException ("Expecting IndexType tag, invalid index file '{0}'", name);
 			}
-			return Load (name, indexClass, spaceClass, config);
+			return Load (name, indexClass, spaceClass, config, after_load_action);
 		}
 	}
 }

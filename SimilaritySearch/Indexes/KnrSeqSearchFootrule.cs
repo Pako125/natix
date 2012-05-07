@@ -27,7 +27,7 @@ namespace natix.SimilaritySearch
 		{
 		}
 
-		protected override void GetCandidates (IList<ushort> qseq, out IList<int> C_docs, out IList<short> C_sim)
+		protected override IResult GetCandidates (IList<ushort> qseq)
 		{
 			int knrbound = Math.Abs (this.KnrBoundBuild);
 			var len_qseq = qseq.Count;
@@ -51,13 +51,12 @@ namespace natix.SimilaritySearch
 					C [docid] = dist + d - omega;
 				}
 			}
-			C_docs = new List<int> (C.Count);
-			C_sim = new List<short> (C.Count);
+			var res = new ResultTies (Math.Abs (this.Maxcand), false);
 			foreach (var pair in C) {
-				C_docs.Add (pair.Key);
-				C_sim.Add ((short)pair.Value);
+				res.Push (pair.Key, pair.Value);
 			}
-			Sorting.Sort<short,int> (C_sim, C_docs);
+
+			return res;
 			/*var first = this.GetKnrSeq (0);
 			var smaller = this.GetKnrSeq (C_docs [0]);
 			Console.WriteLine ("query: {0}, omega: {1}, smaller-docid: {2}", SeqToString (qseq), omega, C_docs [0]);

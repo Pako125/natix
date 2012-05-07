@@ -76,7 +76,7 @@ namespace natix.Sets
 			}
 		}
 		
-		public override IEnumerable<int> Intersection (IList<IList<int>> postings)
+		public override IList<int> Intersection (IList<IList<int>> postings)
 		{
 			int k = postings.Count;
 			Sorting.Sort<IList<int>> (postings, (IList<int> a, IList<int> b) => a.Count - b.Count);

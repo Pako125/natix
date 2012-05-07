@@ -79,7 +79,28 @@ namespace  natix.SimilaritySearch
 		public IList<byte> Parse (string name, bool isquery)
 		{
 			if (name.StartsWith ("obj")) {
-				return this [int.Parse (name.Split (' ') [1])];
+				var A = name.Split (' ');
+				var id = A [1];
+				var u = this [int.Parse (id)];
+				if (A.Length == 2) {
+					return u;
+				}
+				int num_bits = u.Count * 8;
+				var num_flips = float.Parse (A [2]) * num_bits;
+				var L = new byte[u.Count];
+				for (int i = 0; i < u.Count; ++i) {
+					L [i] = u [i];
+				}
+				var rand = new Random ();
+				for (int i = 0; i < num_flips; ++i) {
+					var pos = rand.Next (0, num_bits);
+					if (BitAccess.GetBit (L, pos)) {
+						BitAccess.ResetBit (L, pos);
+					} else {
+						BitAccess.SetBit (L, pos);
+					}
+				}
+				return L;
 			}
 			var res = BinaryHammingSpace.ParseAndLoadFromFile (name, !isquery);
 			return new BinQGram (res, 0, this.Q);

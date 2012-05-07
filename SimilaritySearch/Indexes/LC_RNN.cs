@@ -76,28 +76,7 @@ namespace natix.SimilaritySearch
 		/// </summary>
 		public LC_RNN () : base()
 		{	
-			//this.SeqBuilder = SequenceBuilders.GetIISeq_SArray ();
-			//this.SeqBuilder = SequenceBuilders.GetSeqXLB();
 			this.SeqBuilder = SequenceBuilders.GetIISeq (BitmapBuilders.GetPlainSortedList ());
-			/*
-			var SBGMR06 = SequenceBuilders.GetGolynskiListRL2 (24);
-			var SBOS07 = SequenceBuilders.GetIISeq_SArray ();
-			this.SeqBuilder = delegate (IList<int> seq, int sigma) {
-				// mix
-				if (seq.Count / (sigma - 1) < 128) {
-					// golynski is not good enough (in search time) since cache issues
-					// it is very fast for random queries (random symbol, random pos-rank)
-					// but working on the same symbol, in sequential access, is clearly
-					// suprised by IISeq_SArray
-					return SBGMR06 (seq, sigma);
-				} else {
-					return SBOS07 (seq, sigma);
-				}
-			};*/
-			//this.SeqBuilder = SequenceBuilders.GetGolynskiListRL2 (24);
-			//this.SeqBuilder = SequenceBuilders.GetGolynskiSinglePerm (PermutationBuilders.GetCyclicPerms (24));
-			//this.SeqBuilder = SequenceBuilders.GetIISeq (BitmapBuilders.GetPlainSortedList ());
-
 		}
 		
 		/// <summary>

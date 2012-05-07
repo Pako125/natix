@@ -35,7 +35,7 @@ namespace natix.Sets
 			this.SearchAlgorithm = searchalg;
 		}
 		
-		public IEnumerable<int> Intersection (IList<IList<int>> postings)
+		public IList<int> Intersection (IList<IList<int>> postings)
 		{
 			int k = postings.Count;
 			int[] L = new int[k];

@@ -34,7 +34,7 @@ namespace natix.Sets
 			this.SearchAlgorithm = SearchAlgorithm;
 		}
 		
-		public IEnumerable<int> Intersection (IList<IList<int>> postings)
+		public IList<int> Intersection (IList<IList<int>> postings)
 		{
 			var L = new int[postings.Count];
 			Comparison<int> SortByLength = delegate(int a, int b) {

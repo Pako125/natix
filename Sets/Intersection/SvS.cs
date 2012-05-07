@@ -46,7 +46,7 @@ namespace natix.Sets
 			this.CompCounter = this.SearchAlgorithm.CompCounter;
 		}
 
-		public IEnumerable<int> Intersection (IList<IList<int>> postings)
+		public IList<int> Intersection (IList<IList<int>> postings)
 		{
 			var pLen = postings.Count;
 			Sorting.Sort< IList<int> >(postings, (IList<int> a, IList<int> b) => a.Count - b.Count);

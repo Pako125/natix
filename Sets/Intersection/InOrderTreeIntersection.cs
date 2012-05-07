@@ -63,7 +63,7 @@ namespace natix.Sets
 			}
 		}
 
-		public virtual IEnumerable<int> Intersection (IList< IList<int> > postings)
+		public virtual IList<int> Intersection (IList< IList<int> > postings)
 		{
 			int k = postings.Count;
 			Sorting.Sort< IList<int> >(postings, (IList<int> a, IList<int> b) => a.Count - b.Count);
@@ -86,7 +86,7 @@ namespace natix.Sets
 			return res;
 		}
 		
-		public IEnumerable<int> IntersectionWithEvents (IList<IList<int>> postings, bool doSortByLength, Func< int, IList<int>, int> callback)
+		public IList<int> IntersectionWithEvents (IList<IList<int>> postings, bool doSortByLength, Func< int, IList<int>, int> callback)
 		{
 			int k = postings.Count;
 			if (doSortByLength) {
@@ -108,7 +108,6 @@ namespace natix.Sets
 				tmp = swapAux;
 				callback(i, res);
 			}
-			
 			this.CompCounter = this.SearchAlgorithm.CompCounter;
 			return res;
 		}
