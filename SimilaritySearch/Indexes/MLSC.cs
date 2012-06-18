@@ -40,6 +40,12 @@ namespace natix.SimilaritySearch
 			this.SeqBuilder = SequenceBuilders.GetSeqXLB_SArray64 (16);
 		}
 		
+		public LSC<T>[] Indexes{
+			get{
+				return this.lsc_indexes;
+			}
+		}
+		
 		public SequenceBuilder SeqBuilder {
 			get;
 			set;

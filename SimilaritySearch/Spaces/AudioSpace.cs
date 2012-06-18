@@ -274,13 +274,13 @@ namespace  natix.SimilaritySearch
 		
 		public IList<byte> GetAudio (int audioId)
 		{
-			var dset = this.ListOfLengths.dset;
+		    var dset = this.ListOfLengths.dset;
 			var startPos = 0;
 			if (audioId > 0) {
 				startPos = dset.Select1 (audioId);
 			}
 			var len = this.ListOfLengths [audioId];
-			startPos -= audioId;
+			startPos -= audioId - 1;
 			return new BinQGram (this.Data, startPos, len);
 		}
 		
