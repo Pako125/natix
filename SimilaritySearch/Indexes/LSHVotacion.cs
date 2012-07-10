@@ -36,7 +36,7 @@ namespace natix.SimilaritySearch
 	{
 		static double perror = 0.25;
 		static int candidatos = 4;
-		
+
 		public static void Prueba(string listname, string qlist){
 			
 			int S=3;
@@ -63,23 +63,35 @@ namespace natix.SimilaritySearch
 					var A = new AudioSpace();
 					A.Build(listname, 30*3, 3);
 				}
-				I.Build(indexName,"audio-space",listname,20,4);
+				I.Build(indexName,"audio-space",listname,20,1);
 			}
 			I = IndexLoader.Load(indexName) as HammingMLSC;
 			
 			Console.WriteLine("<-- Searching first object -->");
 			var aspace = (AudioSpace)I.MainSpace;
+			Chronos tiempo = new Chronos();
 			
 			foreach (var qname in (new QueryStream(qlist)).Iterate()) {
 				numconsult++;
 				Console.WriteLine ("<<<--- Inizializing query --->>>");
+				tiempo.Start();
 				var R = SearchAudio (qname, aspace,I);
+				tiempo.End();
+
 				if(R.Count>0){
 					porcen++;
 				}
 				Console.WriteLine ("qname: {0}",qname.QRaw);
+				tiempo.PrintStats("****Tiempo de consulta****");
+
+				var qext = BinaryHammingSpace.ParseAndLoadFromFile(qname.QRaw,false);
+
 				foreach ( var p in R){
 					Console.WriteLine ("docid: {0}, dist: {1}, name: {2}",p.docid, p.dist, aspace.GetNameFromDocId(p.docid));
+					var audio = aspace.GetAudio(p.docid);
+					var distanciaHamming = BinaryHammingSpace.DistMinHamming(audio,qext,aspace.SymbolSize);
+					Console.WriteLine ("***********DocId:  {0}, Distancia BinaryHamming: {1}***************",p.docid, distanciaHamming);
+					Console.WriteLine ("***********Error: {0}%",distanciaHamming/(qext.Count/aspace.SymbolSize * 24)*100);
 				}
 				Console.WriteLine ("<<<--- Finalizing query --->>>");
 			}
@@ -97,10 +109,10 @@ namespace natix.SimilaritySearch
 				Console.WriteLine("XXXXXX: {0}",qname.QRaw);
 				
 				int numqgrams = (qext.Count - aspace.Q) / aspace.SymbolSize;
-				
+				double probabilidad = 0.05;
 				var acc = new Dictionary<int, double>();
 				
-				Rfull = Search1(qext,acc,numqgrams,idx);
+				Rfull = Search1(qext,acc,numqgrams,idx,probabilidad);
 				res_list.Add(Rfull);
 				
 				int count=0;
@@ -126,6 +138,8 @@ namespace natix.SimilaritySearch
 					}
 				}	   
 			}
+
+			return Respuesta;    //Eliminar esto para que todo quede normal
 				
 			if(Respuesta.Count==0){
 				Dictionary<int,double> rcc = new Dictionary<int,double>();
@@ -170,19 +184,24 @@ namespace natix.SimilaritySearch
 			return Respuesta;
 		}
 		
-		public static ResultTies Search1(IList<byte> qext, Dictionary<int,double> acc, int numqgrams, LSC<IList<byte>> I){
+		public static ResultTies Search1(IList<byte> qext, Dictionary<int,double> acc, int numqgrams, LSC<IList<byte>> I, double probabilidad){
 			Chronos time = new Chronos();
 			var aspace = (AudioSpace)I.MainSpace;
 			int numsampleq = numqgrams;
 			int skip = numqgrams/numsampleq;
+			Random r = new Random();
 			
 			time.Begin();
 			for(int sindex=0; sindex <numsampleq; sindex++){
 				int qindex = sindex * skip;
 				BinQGram qgram = new BinQGram(qext, qindex * aspace.SymbolSize, aspace.Q);
 				IResult R = new Result(int.MaxValue, false);
+
+				if(r.NextDouble() > probabilidad){ 
+					continue;
+				}
+
 				I.KNNSearch(qgram,-1,R);
-					
 				HashSet<int> docId = new HashSet<int>();
 					
 				foreach (var u in R){
